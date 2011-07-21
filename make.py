@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "18 Juillet 2011"
-__version__ = "$Revision: 1.5.2 $"
+__date__ = "21 Juillet 2011"
+__version__ = "$Revision: 1.6.0 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -18,7 +18,7 @@ import pdb # To debug
 from svg import *
 
 
-def make_binaries(sources_filename, mains):
+def make_binaries(sources_filename, mains, debug=False):
   """function that will compile every needed sourceFile and get a 
   binary for the defined source files
   
@@ -26,6 +26,7 @@ def make_binaries(sources_filename, mains):
   sources_filename : a list of source filenames that must be present in the current working directory for which we will define an object 'sourceFile'
   mains : either a list of filename or a dictionnary for which keys are filename and values are the name of the binary file we want.
    i.e we define a list of filename if we want that the binary has the same name (without extension) as the source file, or a dictionnary to make the correspondance between the two.
+  debug=False : (boolean) Whether we want or not debug options for compilation. There is no debug by default
   
   Examples : 
   make_binaries(sources_filename, {"mercury6_2.for":"mercury", "element6.for":"element", "close6.for":"close"})
@@ -53,6 +54,8 @@ def make_binaries(sources_filename, mains):
   # For the source files which are programs, we set the flag.
   for main in main_list:
     sourceFile.findSource[main].setProgram(True)
+  
+  sourceFile.setDebug(debug)
   
   # We compile the programs (dependencies are automatically compiled if needed.
   for source in sources:
@@ -108,9 +111,20 @@ def compare(original, new):
   result = list(d.compare(original, new))
   
   differences = []
-  for (number, line) in enumerate(result):
-    if (line[0:2] in modified):
-      differences.append("("+line[0]+") l"+str(number+1)+" :"+line[2:])
+  line_number_original = 0
+  line_number_new = 0
+  for line in result:
+    if (line[0:2] == "  "):
+      line_number_original += 1
+      line_number_new += 1
+    elif (line[0:2] == "- "):
+      line_number_original += 1
+      differences.append("[ori] l"+str(line_number_original)+" :"+line[2:])
+    elif (line[0:2] == "+ "):
+      line_number_new += 1
+      differences.append("[new] l"+str(line_number_new)+" :"+line[2:])
+    elif (line[0:2] == "? "):
+      differences.append("      l"+str(max(line_number_new, line_number_original))+" :"+line[2:])
 
   # We print separately because it is more convenient if we want to store in a file instead.
   if (differences != []):
@@ -143,13 +157,14 @@ def compare2file(ori_files,new_files):
       diff.append([new, difference])
   
   # Now we output results
-  if (no_diff != []):
-    print "No differences seen on :",', '.join(no_diff)
-  
   if (diff != []):
     for (file, comp) in diff:
       print("\nFor "+file)
       print(comp)
+      
+    if (no_diff != []):
+      print "No differences seen on :",', '.join(no_diff)
+  # We doesn't print anything if no file at all has differences
   
   return 0
 
@@ -237,7 +252,11 @@ class sourceFile(object):
   #~ OPTIONS = "-vec-report0 -i-dynamic -mcmodel=medium -shared-intel -L/usr/lib64/atlas -llapack"
   
   COMPILATOR = "gfortran"
-  OPTIONS = "-O3 -march=native "
+  OPTIONS = "-O3 -march=native"
+  DEBUG = "-finit-real=snan -Wall"
+  
+  # Boolean that say if we want to activate debug or not
+  isDebug = False
   
   #-Wextra : batterie supplémentaire de vérifications
   #-ffast-math : je l'ai enlevé car les résultats ne sont pas identiques, les derniers chiffres significatifs sont différents.
@@ -259,7 +278,7 @@ class sourceFile(object):
     
     # By default, nothing is a program
     self.isProgram = isProgram
-
+    
     
     (self.defined, self.used, self.included) = self.__getModules()
     
@@ -267,6 +286,15 @@ class sourceFile(object):
       sourceFile.findModule[module] = self
     
     sourceFile.findSource[self.filename] = self
+  
+  @classmethod
+  def setDebug(cls, isDebug):
+    """method that define cls.isDebug parameter to True or False.
+    
+    Parameter: isDebug (boolean)
+    """
+    
+    cls.isDebug = isDebug
   
   @classmethod
   def setModColors(cls):
@@ -547,10 +575,14 @@ class sourceFile(object):
       
       # Now that all the dependencies have been compiled, we compile 
       # the current source file.
+      options = sourceFile.OPTIONS
+      if (sourceFile.isDebug):
+        options += " "+sourceFile.DEBUG
+        
       if not(self.isProgram):
-        commande = sourceFile.COMPILATOR+" "+sourceFile.OPTIONS+" -c "+self.filename
+        commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
       else:
-        commande = sourceFile.COMPILATOR+" "+sourceFile.OPTIONS+" -o "+self.name+" "+self.filename+" "+" ".join(self.dependencies)
+        commande = sourceFile.COMPILATOR+" "+options+" -o "+self.name+" "+self.filename+" "+" ".join(self.dependencies)
       
       process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
@@ -611,3 +643,4 @@ if __name__ == '__main__':
 #               (pose des problèmes de "multiple definition" sinon)
 # Version 1.5.0 : Rajout de la couleur, implémentation sur une idée de marie pour rendre les graphes plus clairs.
 # Version 1.5.2 : Rajout de la méthode setCompilator à la classe sourceFile
+# Version 1.6.0 : Modification de compare() pour afficher de manière plus claire les différences entre les fichiers.
