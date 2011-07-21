@@ -18,7 +18,7 @@ import pdb # To debug
 from svg import *
 
 
-def make_binaries(sources_filename, mains, debug=False):
+def make_binaries(sources_filename, mains, debug=False, gdb=False):
   """function that will compile every needed sourceFile and get a 
   binary for the defined source files
   
@@ -56,6 +56,7 @@ def make_binaries(sources_filename, mains, debug=False):
     sourceFile.findSource[main].setProgram(True)
   
   sourceFile.setDebug(debug)
+  sourceFile.setGDB(gdb)
   
   # We compile the programs (dependencies are automatically compiled if needed.
   for source in sources:
@@ -252,11 +253,13 @@ class sourceFile(object):
   #~ OPTIONS = "-vec-report0 -i-dynamic -mcmodel=medium -shared-intel -L/usr/lib64/atlas -llapack"
   
   COMPILATOR = "gfortran"
-  OPTIONS = "-O3 -march=native"
-  DEBUG = "-finit-real=snan -Wall"
+  OPTIONS = "-O3 -march=native -fimplicit-none"
+  DEBUG = "-finit-real=snan -Wall -Wuninitialized"
+  GDB = "-g"
   
   # Boolean that say if we want to activate debug or not
   isDebug = False
+  isGDB = False
   
   #-Wextra : batterie supplémentaire de vérifications
   #-ffast-math : je l'ai enlevé car les résultats ne sont pas identiques, les derniers chiffres significatifs sont différents.
@@ -295,6 +298,15 @@ class sourceFile(object):
     """
     
     cls.isDebug = isDebug
+
+  @classmethod
+  def setGDB(cls, isGDB):
+    """method that define cls.isGDB parameter to True or False.
+    
+    Parameter: isGDB (boolean)
+    """
+    
+    cls.isGDB = isGDB
   
   @classmethod
   def setModColors(cls):
@@ -578,6 +590,9 @@ class sourceFile(object):
       options = sourceFile.OPTIONS
       if (sourceFile.isDebug):
         options += " "+sourceFile.DEBUG
+      
+      if (sourceFile.isGDB):
+        options += " "+sourceFile.GDB
         
       if not(self.isProgram):
         commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
