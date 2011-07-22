@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "21 Juillet 2011"
-__version__ = "$Revision: 1.6.0 $"
+__date__ = "22 Juillet 2011"
+__version__ = "$Revision: 1.6.1 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -18,15 +18,19 @@ import pdb # To debug
 from svg import *
 
 
-def make_binaries(sources_filename, mains, debug=False, gdb=False):
+def make_binaries(sources_filename, mains, debug=False, gdb=False, profiling=False):
   """function that will compile every needed sourceFile and get a 
   binary for the defined source files
   
   Parameters : 
   sources_filename : a list of source filenames that must be present in the current working directory for which we will define an object 'sourceFile'
   mains : either a list of filename or a dictionnary for which keys are filename and values are the name of the binary file we want.
-   i.e we define a list of filename if we want that the binary has the same name (without extension) as the source file, or a dictionnary to make the correspondance between the two.
+   i.e we define a list of filename if we want that the binary has the same name (without extension) as the source file, 
+   or a dictionnary to make the correspondance between the two.
   debug=False : (boolean) Whether we want or not debug options for compilation. There is no debug by default
+  gdb=False : If set to True, will add a compilation option to run the program under the GNU debugger gdb. 
+  profiling=False : If set to True, will change compilation options to profile the binary files (using gprof). 
+                    As a consequence, this will deactivate all optimization options. 
   
   Examples : 
   make_binaries(sources_filename, {"mercury6_2.for":"mercury", "element6.for":"element", "close6.for":"close"})
@@ -57,6 +61,7 @@ def make_binaries(sources_filename, mains, debug=False, gdb=False):
   
   sourceFile.setDebug(debug)
   sourceFile.setGDB(gdb)
+  sourceFile.setProfiling(profiling)
   
   # We compile the programs (dependencies are automatically compiled if needed.
   for source in sources:
@@ -254,12 +259,13 @@ class sourceFile(object):
   
   COMPILATOR = "gfortran"
   OPTIONS = "-O3 -march=native -fimplicit-none"
-  DEBUG = "-finit-real=snan -Wall -Wuninitialized"
+  DEBUG = "-finit-real=zero -Wall -Wuninitialized"
   GDB = "-g"
   
   # Boolean that say if we want to activate debug or not
   isDebug = False
   isGDB = False
+  isProfiling = False
   
   #-Wextra : batterie supplémentaire de vérifications
   #-ffast-math : je l'ai enlevé car les résultats ne sont pas identiques, les derniers chiffres significatifs sont différents.
@@ -307,6 +313,15 @@ class sourceFile(object):
     """
     
     cls.isGDB = isGDB
+  
+  @classmethod
+  def setProfiling(cls, isProfiling):
+    """method that define cls.isProfiling parameter to True or False.
+    
+    Parameter: isProfiling (boolean)
+    """
+    
+    cls.isProfiling = isProfiling
   
   @classmethod
   def setModColors(cls):
@@ -593,6 +608,10 @@ class sourceFile(object):
       
       if (sourceFile.isGDB):
         options += " "+sourceFile.GDB
+      
+      if (sourceFile.isProfiling):
+        # We deactivate all other options except GDB
+        options = sourceFile.GDB+" -pg"
         
       if not(self.isProgram):
         commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
@@ -659,3 +678,4 @@ if __name__ == '__main__':
 # Version 1.5.0 : Rajout de la couleur, implémentation sur une idée de marie pour rendre les graphes plus clairs.
 # Version 1.5.2 : Rajout de la méthode setCompilator à la classe sourceFile
 # Version 1.6.0 : Modification de compare() pour afficher de manière plus claire les différences entre les fichiers.
+# Version 1.6.1 : L'option de profiling a été ajoutée à la classe sourceFile. Cette dernière désactive toutes les autres options.
