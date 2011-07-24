@@ -258,20 +258,24 @@ class sourceFile(object):
   #~ OPTIONS = "-vec-report0 -i-dynamic -mcmodel=medium -shared-intel -L/usr/lib64/atlas -llapack"
   
   COMPILATOR = "gfortran"
-  OPTIONS = "-O3 -march=native -fimplicit-none"
-  DEBUG = "-finit-real=zero -Wall -Wuninitialized"
+  OPTIONS = "-O3 -march=native"
+  DEBUG = "-Wall -Wuninitialized"
   GDB = "-g"
   
-  # Boolean that say if we want to activate debug or not
-  isDebug = False
-  isGDB = False
-  isProfiling = False
+  
   
   #-Wextra : batterie supplémentaire de vérifications
   #-ffast-math : je l'ai enlevé car les résultats ne sont pas identiques, les derniers chiffres significatifs sont différents.
   #-march=native : permet d'optimiser pour le processeur de la machine sur laquelle on compile. 'native' permet d'aller chercher 
   #   cette information sur la machine au lieu de la spécifier à la main. Si l'option ne fonctionne pas, typiquement si 'native' ou 
   #   le type de processeur spécifié n'existe pas, une erreur est retournée.
+  #-fimplicit-none : empêche les déclarations implicites à moins que le mot clé "implicit" ne soit explicitement utilisé.
+  #-finit-real=zero : initialise tous les réels à 0
+
+  # Boolean that say if we want to activate debug or not
+  isDebug = False
+  isGDB = False
+  isProfiling = False
   
   def __init__(self, filename, name='default', isProgram=False):
     """Will check everything that is included in the source code
@@ -617,6 +621,7 @@ class sourceFile(object):
         commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
       else:
         commande = sourceFile.COMPILATOR+" "+options+" -o "+self.name+" "+self.filename+" "+" ".join(self.dependencies)
+        print(commande)
       
       process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
