@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "22 Juillet 2011"
+__date__ = "25 Juillet 2011"
 __version__ = "$Revision: 1.6.1 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
@@ -504,7 +504,7 @@ class sourceFile(object):
       parent_y = y
     
         
-    architecture.append(TextBox(self.name, parent_x-width/2., parent_y-height/2.))
+    architecture.append(TextBox(self.name, parent_x-width/2., parent_y-height/2., color=sourceFile.mod_colors[self.filename]))
 
     return (architecture, parent_x, parent_y, tree_width)
 
