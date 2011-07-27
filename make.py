@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "25 Juillet 2011"
-__version__ = "$Revision: 1.6.1 $"
+__date__ = "26 Juillet 2011"
+__version__ = "$Revision: 1.6.2 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -258,7 +258,7 @@ class sourceFile(object):
   #~ OPTIONS = "-vec-report0 -i-dynamic -mcmodel=medium -shared-intel -L/usr/lib64/atlas -llapack"
   
   COMPILATOR = "gfortran"
-  OPTIONS = "-O3 -march=native"
+  OPTIONS = "-O2 -march=native"
   DEBUG = "-Wall -Wuninitialized"
   GDB = "-g"
   
@@ -271,6 +271,7 @@ class sourceFile(object):
   #   le type de processeur spécifié n'existe pas, une erreur est retournée.
   #-fimplicit-none : empêche les déclarations implicites à moins que le mot clé "implicit" ne soit explicitement utilisé.
   #-finit-real=zero : initialise tous les réels à 0
+  # farfadet spatial m'a conseillé -O2 au lieu de -O3 mais je ne comprends pas encore pourquoi.
 
   # Boolean that say if we want to activate debug or not
   isDebug = False
