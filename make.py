@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "26 Juillet 2011"
-__version__ = "$Revision: 1.6.2 $"
+__date__ = "18 août 2011"
+__version__ = "$Revision: 1.6.3 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -611,12 +611,12 @@ class sourceFile(object):
       if (sourceFile.isDebug):
         options += " "+sourceFile.DEBUG
       
-      if (sourceFile.isGDB):
+      if (sourceFile.isGDB or sourceFile.isProfiling):
         options += " "+sourceFile.GDB
       
       if (sourceFile.isProfiling):
         # We deactivate all other options except GDB
-        options = sourceFile.GDB+" -pg"
+        options += " "+" -pg"
         
       if not(self.isProgram):
         commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
