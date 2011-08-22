@@ -615,7 +615,7 @@ class sourceFile(object):
         options += " "+sourceFile.GDB
       
       if (sourceFile.isProfiling):
-        # We deactivate all other options except GDB
+        # We deactivate all other options except GDB => not True anymore
         options += " "+" -pg"
         
       if not(self.isProgram):

@@ -3,11 +3,12 @@
 """module mercury qui permet de lancer des simulations via python"""
 # Classe qui définit un environnement permettant de lancer et configurer une simulation mercury. Dans la pratique, il faut définir un script python pour une meta-simulation. Vous pouvez ensuite lancer ce script autant de fois que vous voulez, il va chercher les dossiers existants et en créer un en suivant pour la simulation suivante. Ainsi, on peut lancer plusieurs fois le script à la suite dans la queue du serveur (au hasard venus) pour en faire plusieurs en parallèle.
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-06-24"
-__version__ = "2.0b"
+__date__ = "2011-08-22"
+__version__ = "2.1"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 import os
+import pdb # usefull to debug with pdb.set_trace()
 
 AN = 365.25  # nombre de jours dans un an, c'est plus simple ensuite pour calculer T
 
@@ -827,6 +828,69 @@ class Close(object):
 		close.write(Close.CLOSE_END)
 		close.close()
 
+class Disk(object):
+	"""class that define an object equivalent to disk.in, a parameter file of a mercury simulation (implemented by my user_module)
+	
+	Parameters:
+	b_over_h=None : the smoothing length for the planet's potential [No dim]
+	adiabatic_index=None : the adiabatic index for the gas equation of state [No dim]
+	mean_molecular_weight=None : the mean molecular weight in mass of a proton [m_proton]
+	surface_density=None : a tuple of 2 values. The first must be the surface density at R=1AU (in g/cm^2). The second is the negative slope of the surface density power law
+	temperature=None : a tuple of 2 values. The first must be the temperature at R=1AU (in K). The second is the negative slope of the temperature power law
+	alpha=None : alpha parameter for an alpha prescription of the viscosity [No dim]
+	"""
+
+	
+	DISK_START = "! ------------------------------------------------\n" + \
+					"! Parameter file for various properties of the disk. \n" + \
+					"! ------------------------------------------------\n" + \
+					"! blanck line or with spaces will be skipped. \n" + \
+					"! In fact, the only lines that matter are non commented lines with a '=' character to distinguish\n" + \
+					"! the identificator and the value(s) (each value must be separated with at least one space. \n" + \
+					"! Line must not be longer than 80 character, but comments can be far bigger than that, even on line with a parameter to read.\n\n"
+	
+	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, alpha=None):
+		"""initialisation of the class"""
+
+		self.parameter = {}
+		
+		if (b_over_h != None):
+			self.parameter['b/h'] = b_over_h
+		
+		if (adiabatic_index != None):
+			self.parameter['adiabatic_index'] = adiabatic_index
+		
+		if (mean_molecular_weight != None):
+			self.parameter['mean_molecular_weight'] = mean_molecular_weight
+		
+		if (surface_density != None):
+			self.parameter['surface_density'] = surface_density
+		
+		if (temperature != None):
+			self.parameter['temperature'] = temperature
+		
+		if (alpha != None):
+			self.parameter['alpha'] = alpha
+			
+	
+	
+	def write(self):
+		"""write all the data in a file named 'element.in' in the current working directory"""
+		
+		## On génère le fichier "disk.in" avec les valeurs passées en paramètre
+		disk = open('disk.in','w')
+		## On écrit l'entête
+		disk.write(Disk.DISK_START)
+		
+		for (key, value) in self.parameter.items():
+			if (type(value) in (list, tuple)):
+				disk.write(key+" = "+" ".join(map(str, value))+"\n")
+			else:
+				disk.write(key+" = "+str(value)+"\n")
+		
+		disk.close()
+
+
 class Message(object):
 	"""class that creates and write the message.in parameter file, needed by element6,mercury and maybe close"""
 	
@@ -1137,10 +1201,16 @@ if __name__=='__main__':
 	J2=0, J4=0, J6=0, changeover=3., data_dump=500, periodic_effect=100)
 	paramin.write()
 	
-	Files.write()
-	Messages.write()
+	filesin = Files()
+	filesin.write()
 	
-	for file in ["big.in", "small.in", "param.in", "element.in", "close.in", "messages.in", "files.in"]:
+	messagein = Message()
+	messagein.write()
+	
+	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(1700, 0.5), temperature=(510, 1), alpha=0.005)
+	diskin.write()
+	
+	for file in ["big.in", "small.in", "param.in", "element.in", "close.in", "message.in", "files.in"]:
 		os.remove(file)
 	
 	print(mercury)
