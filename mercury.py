@@ -3,8 +3,8 @@
 """module mercury qui permet de lancer des simulations via python"""
 # Classe qui définit un environnement permettant de lancer et configurer une simulation mercury. Dans la pratique, il faut définir un script python pour une meta-simulation. Vous pouvez ensuite lancer ce script autant de fois que vous voulez, il va chercher les dossiers existants et en créer un en suivant pour la simulation suivante. Ainsi, on peut lancer plusieurs fois le script à la suite dans la queue du serveur (au hasard venus) pour en faire plusieurs en parallèle.
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-08-22"
-__version__ = "2.1"
+__date__ = "2011-08-23"
+__version__ = "2.1.1"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 import os
@@ -14,7 +14,7 @@ AN = 365.25  # nombre de jours dans un an, c'est plus simple ensuite pour calcul
 
 class Body(AutiwaObject):
 	"""
-	class that define a planet and his characteristics
+	class that define a planet and his characteristics. This is a meta class, used by BodyAst, BodyCom and BodyCart
 	
 	Optional arameters common to all types of bodies:
 	m = X    where X is a real number, to indicate the body's mass in
@@ -110,9 +110,9 @@ class Body(AutiwaObject):
 		return texte
 	
 	def format(self):
-		"""overload the str method. As a consequence, you can print the object via print name_instance
+		"""method that return a formatted output usefull to write properties of the Body in a file (either big.in or small.in)
 		
-		return : a string that represent the properties of the object
+		return : a string that represent the properties of the object and that fit requirements for mercury
 		"""
 		
 		texte = ""
@@ -174,7 +174,9 @@ class BodyAst(Body):
 		return texte
 	
 	def format(self):
-		"""to redefine the str() function, and add information to the one in the parent class 'Body'
+		"""method that return a formatted output usefull to write properties of the Body in a file (either big.in or small.in)
+		
+		return : a string that represent the properties of the object and that fit requirements for mercury
 		"""
 		
 		texte = Body.format(self)
@@ -193,7 +195,7 @@ class BodyCom(Body):
 	I = inclination (degrees)
 	g = argument of pericentre (degrees)
 	n = longitude of the ascending node (degrees)
-	M = mean anomaly (degrees)
+	T = epoch of pericentre (days)
 	sx, sy, sz : the 3 components of spin angular momentum for the body,
 	             in units of solar masses AU^2 per day
 	"""
@@ -222,7 +224,9 @@ class BodyCom(Body):
 		return texte
 	
 	def format(self):
-		"""method that return what to write in mercury file for a body.
+		"""method that return a formatted output usefull to write properties of the Body in a file (either big.in or small.in)
+		
+		return : a string that represent the properties of the object and that fit requirements for mercury
 		"""
 		
 		texte = Body.format(self)
@@ -267,7 +271,9 @@ class BodyCart(Body):
 		return texte
 	
 	def format(self):
-		"""to redefine the str() function, and add information to the one in the parent class 'Body'
+		"""method that return a formatted output usefull to write properties of the Body in a file (either big.in or small.in)
+		
+		return : a string that represent the properties of the object and that fit requirements for mercury
 		"""
 		
 		texte = Body.format(self)
@@ -849,6 +855,18 @@ class Disk(object):
 					"! the identificator and the value(s) (each value must be separated with at least one space. \n" + \
 					"! Line must not be longer than 80 character, but comments can be far bigger than that, even on line with a parameter to read.\n\n"
 	
+	COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
+						'adiabatic_index':"! the adiabatic index for the gas equation of state", 
+						'mean_molecular_weight':"! ! the mean molecular weight in mass of a proton", 
+						'surface_density':"! Here we define the power law for surface density sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
+																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
+																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
+						'temperature':"! Here we define the power law for temperature T(R) = temperature_0 * R^(-temperature_index) \n" +\
+													"! where temperature_0 is the temperature at (R=1AU) [K] and \n" +\
+													"! where temperature_index is the the negative slope of the temperature power law (beta in the paper)", 
+						'alpha':"! alpha parameter for an alpha prescription (viscosity(R) = alpha * c_s * H) of the viscosity [No dim]"}
+	
+	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, alpha=None):
 		"""initialisation of the class"""
 
@@ -883,6 +901,8 @@ class Disk(object):
 		disk.write(Disk.DISK_START)
 		
 		for (key, value) in self.parameter.items():
+			disk.write("\n")
+			disk.write(Disk.COMMENT[key]+"\n")
 			if (type(value) in (list, tuple)):
 				disk.write(key+" = "+" ".join(map(str, value))+"\n")
 			else:
@@ -1209,6 +1229,8 @@ if __name__=='__main__':
 	
 	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(1700, 0.5), temperature=(510, 1), alpha=0.005)
 	diskin.write()
+	
+	pdb.set_trace()
 	
 	for file in ["big.in", "small.in", "param.in", "element.in", "close.in", "message.in", "files.in"]:
 		os.remove(file)
