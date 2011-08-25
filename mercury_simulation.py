@@ -38,7 +38,9 @@ LOCATION_DATASIMU="/home/autiwa/documents/travail/Tests/data_meta_simu"
 
 
 class Simulation(AutiwaObject):
-	"""Class that define a mercury simulation. It allows us to create the input files (param.in, element.in, big.in) and to run the simulation wen everything is defined. Each instance of that class is associated to a meta-simulation, that is to say a group of simulation in wich we will run several simulation with the same specifications (to make statistics)
+	"""Class that define a mercury simulation. It allows us to create the input files (param.in, element.in, big.in) and to run the 
+	simulation when everything is defined. Each instance of that class is associated to a meta-simulation, 
+	that is to say a group of simulation in wich we will run several simulation with the same specifications (to make statistics)
 
 	Methods
 	write_element : écrit element.in
@@ -48,7 +50,9 @@ class Simulation(AutiwaObject):
 	self.runing : (True, False) set to False if no instance is currently runing, but set to True while a process is runing into the directory. 
 	system : an object of the class PlanetarySystem that contains all the orbital elements necessary for writing big.in
 	 
-	Error : if two instance of the class use the same directory, there's nothing to test if one of the two is currently runing. Each instance must be associated to a folder. Each time we run a simulation, we cut the output files in an output-directory wich can be a sub-directory of the current directory or a defined directory in a different location.
+	Error : if two instance of the class use the same directory, there's nothing to test if one of the two is currently runing. 
+	Each instance must be associated to a folder. Each time we run a simulation, we cut the output files in an output-directory which 
+	can be a sub-directory of the current directory or a defined directory in a different location.
 	 
 	à compléter
 	"""

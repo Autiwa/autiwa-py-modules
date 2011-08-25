@@ -372,7 +372,7 @@ class PlanetarySystem(AutiwaObject):
 			return
 		
 		texte = ""
-		if (self.nb_planets > 0):
+		if ((len(self.big)) > 0):
 			texte += "mass of the central body :"+str(self.m_star)+"ms\n"
 			texte += "epoch :"+str(self.epoch)+"\n"
 			
