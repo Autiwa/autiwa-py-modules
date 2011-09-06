@@ -34,6 +34,29 @@ def setExecutionRight(doc_name):
 
 	return returncode
 
+def str2bool(value):
+	"""function that convert a string into a boolean given various ways to say 'True'. 
+	The normal behaviour in python is to set to 
+	True when the string is not empty, which is not what I want.
+	
+	Return : True (boolean) if value is 'True', 'yes', 1 or '.true.' 
+	(no matter the case, i.e True, TRUE, true or tRuE will work)"""
+	return value.lower() in ("yes", "true", "1", '.true.')
+	
+def str2str(value):
+	"""function that convert a string into a string. That might be weird to say, 
+	but this function aim to suppress any '"' or "'" in string
+	
+	Return a string without extremal quotes that might exist
+	"""
+	
+	# We suppress extremal white spaces
+	value = value.strip()
+	
+	value = value.strip('"').strip("'")
+	
+	return value
+
 
 def writeRunjob(command, queue, nb_proc=1):
 	"""function that creates a script named 'runjob' that
@@ -56,11 +79,18 @@ def writeRunjob(command, queue, nb_proc=1):
 
 	NAME_SCRIPT = "runjob"
 
+	
+	
+	if (queue == ""):
+		queue_append = ""
+	else:
+		queue_append = " -q "+queue
+	
 	script = open(NAME_SCRIPT, 'w')
 	if (nb_proc > 1):
-		script.write("qsub -pe mpi "+str(nb_proc)+" -q "+queue+" "+command)
+		script.write("qsub -pe mpi "+str(nb_proc)+queue_append+" "+command)
 	else:
-		script.write("qsub -q "+queue+" "+command)
+		script.write("qsub"+queue_append+" "+command)
 
 	script.close()
 

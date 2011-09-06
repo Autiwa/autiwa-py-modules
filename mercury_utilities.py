@@ -9,6 +9,7 @@ __version__ = "1.0"
 
 import mercury
 from random import uniform 
+import simulations
 
 def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	""" We will assume a certain number of parameters. For example, all bodies will be big bodies. 
@@ -54,9 +55,13 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	
 	
 	# We generate randomly g, n, and M
-	g = [uniform(0, 360) for i in range(nb_planets)]
-	n = [uniform(0, 360) for i in range(nb_planets)]
-	M = [uniform(0, 360) for i in range(nb_planets)]
+	g = simulations.setParameter((0, 360, 'uniform'), nb_planets)
+	n = simulations.setParameter((0, 360, 'uniform'), nb_planets)
+	M = simulations.setParameter((0, 360, 'uniform'), nb_planets)
+
+	#~ g = [uniform(0, 360) for i in range(nb_planets)]
+	#~ n = [uniform(0, 360) for i in range(nb_planets)]
+	#~ M = [uniform(0, 360) for i in range(nb_planets)]
 	
 	bodies = []
 	index = 1

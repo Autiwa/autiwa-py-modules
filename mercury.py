@@ -842,7 +842,7 @@ class Disk(object):
 	adiabatic_index=None : the adiabatic index for the gas equation of state [No dim]
 	mean_molecular_weight=None : the mean molecular weight in mass of a proton [m_proton]
 	surface_density=None : a tuple of 2 values. The first must be the surface density at R=1AU (in g/cm^2). The second is the negative slope of the surface density power law
-	temperature=None : a tuple of 2 values. The first must be the temperature at R=1AU (in K). The second is the negative slope of the temperature power law
+	temperature=None : a tuple of 2 values. (radius_min, radius_max), in AU, boundary values for the radius sample of the temperature profile. The number of point is given directly in mfo_user
 	alpha=None : alpha parameter for an alpha prescription of the viscosity [No dim]
 	"""
 
@@ -861,9 +861,7 @@ class Disk(object):
 						'surface_density':"! Here we define the power law for surface density sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
 																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
-						'temperature':"! Here we define the power law for temperature T(R) = temperature_0 * R^(-temperature_index) \n" +\
-													"! where temperature_0 is the temperature at (R=1AU) [K] and \n" +\
-													"! where temperature_index is the the negative slope of the temperature power law (beta in the paper)", 
+						'temperature':"! Here we define the radius_min and radius_max for the 'a' sample of the temperature profile", 
 						'alpha':"! alpha parameter for an alpha prescription (viscosity(R) = alpha * c_s * H) of the viscosity [No dim]"}
 	
 	

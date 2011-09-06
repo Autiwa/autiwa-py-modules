@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "18 août 2011"
-__version__ = "$Revision: 1.6.3 $"
+__date__ = "26 août 2011"
+__version__ = "$Revision: 1.7.0 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
 
 All you have to do is to define wich sourcefile is the main sourcefile. The module will get binaries only for theses sources (there can be severals)
 """
-import os
+import os, sys
 import string
 import subprocess # To launch various process, get outputs et errors, returnCode and so on.
 import difflib # To compare two strings
@@ -636,16 +636,16 @@ class sourceFile(object):
       # If returnCode is not 0, then there was a problem
       if (returnCode==0):
         return process_stderr
-      else:
-        print("There was a problem while compiling "+self.filename)
-        
+      else:        
         logname = "compiling_"+self.filename+".log"
-        print("Writing the output of the compilation in '"+logname+"'")
 
+        # We write compilation errors in the following file.
         f = open(logname,'w')
         f.write(process_stderr)
         f.close()
-        return returnCode
+        
+        print("Compilation error, see '"+logname+"'")
+        sys.exit(1)
       
   def __str__(self):
     """overload the str method. As a consequence, you can print the object via print name_instance
@@ -685,3 +685,4 @@ if __name__ == '__main__':
 # Version 1.5.2 : Rajout de la méthode setCompilator à la classe sourceFile
 # Version 1.6.0 : Modification de compare() pour afficher de manière plus claire les différences entre les fichiers.
 # Version 1.6.1 : L'option de profiling a été ajoutée à la classe sourceFile. Cette dernière désactive toutes les autres options.
+# Version 1.7.0 : Si une erreur de compilation survient, le programme s'arrête et affiche un message d'erreur donnant le nom du fichier à regarder pour consulter les erreurs
