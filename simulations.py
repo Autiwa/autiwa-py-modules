@@ -6,7 +6,7 @@ from __future__ import print_function
 
 __author__ = "Autiwa <autiwa@gmail.com>"
 __date__ = "24 août 2011"
-__version__ = "$Revision: 0.2 $"
+__version__ = "$Revision: 0.3 $"
 __credits__ = """Module that contains functions to help generate simulations, no matter the code. Function to generate random parameters
 function to round values with significative round and so on."""
 
@@ -86,12 +86,16 @@ def writeRunjob(command, queue, nb_proc=1):
 	else:
 		queue_append = " -q "+queue
 	
-	script = open(NAME_SCRIPT, 'w')
+	
 	if (nb_proc > 1):
-		script.write("qsub -pe mpi "+str(nb_proc)+queue_append+" "+command)
+		qsub = "qsub -pe mpi "+str(nb_proc)+queue_append+" "+command
 	else:
-		script.write("qsub"+queue_append+" "+command)
-
+		qsub = "qsub"+queue_append+" "+command
+	
+	script = open(NAME_SCRIPT, 'w')
+	script.write("stdout=$("+qsub+")\n")
+	script.write("echo $stdout\n")
+	script.write("echo `pwd` ':' $stdout>>~/qsub.log\n")
 	script.close()
 
 	setExecutionRight(NAME_SCRIPT)

@@ -7,6 +7,7 @@ __date__ = "2011-08-23"
 __version__ = "2.1.1"
 
 from autiwa import AutiwaObject  # We only import what interests us.
+from simulations import number_fill
 import os
 import pdb # usefull to debug with pdb.set_trace()
 
@@ -48,8 +49,8 @@ class Body(AutiwaObject):
 	
 	NB_SMALL = 0  # The number of small bodies. Usefull for the default name of the planets
 	NB_BIG = 0 # The number of big bodies
-	BIG_PREFIX = "PLANETE"
-	SMALL_PREFIX = "ASTEROI"
+	BIG_PREFIX = "BIG_" # must take 4 characters
+	SMALL_PREFIX = "AST_" # must take 4 characters
 
 	def __init__(self, type, name=None, m=None, r=None, d=None, a1=None, a2=None, a3=None, ep=None):
 		"""set the optional parameters of the body"""
@@ -73,11 +74,14 @@ class Body(AutiwaObject):
 		else:
 			self.isEPOCH = False
 		
+		# By default, we give a name based on the index of the planet (assuming all the instances will be on the planetary system. 
+		# That means that if we define two planetary systems, the second one will have planet with indexes that follow indexes of the 
+		# first planetary system.
 		if (name == None):
 			if (self.type == "small"):
-				self.name = Body.SMALL_PREFIX+str(Body.NB_SMALL)
+				self.name = Body.SMALL_PREFIX+number_fill(Body.NB_SMALL, 4)
 			elif (self.type == "big"):
-				self.name = Body.BIG_PREFIX+str(Body.NB_BIG)
+				self.name = Body.BIG_PREFIX+number_fill(Body.NB_BIG, 4)
 		else:
 			self.name = name
 		
@@ -843,7 +847,7 @@ class Disk(object):
 	mean_molecular_weight=None : the mean molecular weight in mass of a proton [m_proton]
 	surface_density=None : a tuple of 2 values. The first must be the surface density at R=1AU (in g/cm^2). The second is the negative slope of the surface density power law
 	temperature=None : a tuple of 2 values. (radius_min, radius_max), in AU, boundary values for the radius sample of the temperature profile. The number of point is given directly in mfo_user
-	alpha=None : alpha parameter for an alpha prescription of the viscosity [No dim]
+	viscosity=None : constant viscosity of the disk [cm^2/s]
 	"""
 
 	
@@ -862,10 +866,10 @@ class Disk(object):
 																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'temperature':"! Here we define the radius_min and radius_max for the 'a' sample of the temperature profile", 
-						'alpha':"! alpha parameter for an alpha prescription (viscosity(R) = alpha * c_s * H) of the viscosity [No dim]"}
+						'viscosity':"! constant viscosity of the disk [cm^2/s]"}
 	
 	
-	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, alpha=None):
+	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, viscosity=None):
 		"""initialisation of the class"""
 
 		self.parameter = {}
@@ -885,8 +889,8 @@ class Disk(object):
 		if (temperature != None):
 			self.parameter['temperature'] = temperature
 		
-		if (alpha != None):
-			self.parameter['alpha'] = alpha
+		if (viscosity != None):
+			self.parameter['viscosity'] = viscosity
 			
 	
 	

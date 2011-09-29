@@ -4,8 +4,8 @@
 planetary system with user friendly commands. """
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-08-24"
-__version__ = "1.0"
+__date__ = "2011-09-21"
+__version__ = "1.1"
 
 import mercury
 from random import uniform 
@@ -31,8 +31,6 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	Return : 
 	An object PlanetarySystem defined with the given parameters
 	"""
-	
-	PREFIX_BIG = "PLANETE"
 	
 	if (type(m) != list):
 		raise TypeError("'m' must be a list")
@@ -66,9 +64,7 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	bodies = []
 	index = 1
 	for (mi, ai, ei, Ii, gi, ni, Mi) in zip(m, a, e, I, g, n, M):
-		str_idx = str(index)
-		name = PREFIX_BIG[0:8-len(str_idx)]+str_idx
-		bodies.append(mercury.BodyAst("big", name=name, m=mi, a=ai, e=ei, I=Ii, 
+		bodies.append(mercury.BodyAst("big", m=mi, a=ai, e=ei, I=Ii, 
 g=gi, n=ni, M=Mi, ep=epoch))
 		index += 1
 	
