@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2 septembre 2011"
-__version__ = "$Revision: 0.2 $"
+__date__ = "30 septembre 2011"
+__version__ = "$Revision: 0.3 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -494,7 +494,10 @@ class ProgramSource(object):
 
 		# For each modules, we search the defined object in the base of sourcefiles
 		for mod in used:
-			dependencies.append(SubroutineSource.findSubroutine[mod])
+			try:
+				dependencies.append(SubroutineSource.findSubroutine[mod])
+			except:
+				pdb.set_trace()
 
 		nb_dep = len(dependencies)
 		
@@ -638,7 +641,8 @@ class FortranSource(object):
 					name_program = string.split(words[1],',')[0]
 
 					program_source = [lsave]
-
+					
+					# We extract the code of the entire program
 					isInsideProgram = True
 					while isInsideProgram:
 						line_index += 1
@@ -661,9 +665,11 @@ class FortranSource(object):
 
 					program.append(ProgramSource(name=name_program, source=program_source))
 					
-				if (words[0] == 'subroutine'):
-					name_subroutine = string.split(words[1],',')[0]
 					
+				if (words[0] == 'subroutine'):
+					name_subroutine = string.split(words[1],'(')[0]
+
+					# We extract the source code of the subroutine
 					subroutine_source = [lsave]
 					isInsideSubroutine = True
 					while ((line_index < nb_lines-1) and ((len(words) <= 2) or (words[0] != "end" and words[1] != "subroutine" and words[2] != name_subroutine))):
