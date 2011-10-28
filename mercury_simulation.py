@@ -6,6 +6,10 @@ __author__ = "Autiwa <autiwa@gmail.com>"
 __date__ = "2010-09-05"
 __version__ = "1.0"
 
+#########################################@
+###### module et classe obsolète, je ne m'en sers plus. J'utilise mercury-meta-simulation.py à la place.
+##########################################
+
 # RMQ : J'ai modifié pour que print soit sous la forme print() en prévision de la v3 de python
 
 import os   # used to change directories and create folders

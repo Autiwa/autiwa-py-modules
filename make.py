@@ -258,8 +258,8 @@ class sourceFile(object):
   #~ OPTIONS = "-vec-report0 -i-dynamic -mcmodel=medium -shared-intel -L/usr/lib64/atlas -llapack"
   
   COMPILATOR = "gfortran"
-  OPTIONS = "-O2 -march=native"
-  DEBUG = "-Wall -Wuninitialized"
+  OPTIONS = "-O3 -march=native"
+  DEBUG = "-fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic"
   GDB = "-g"
   
   

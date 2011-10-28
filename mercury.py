@@ -3,8 +3,8 @@
 """module mercury qui permet de lancer des simulations via python"""
 # Classe qui définit un environnement permettant de lancer et configurer une simulation mercury. Dans la pratique, il faut définir un script python pour une meta-simulation. Vous pouvez ensuite lancer ce script autant de fois que vous voulez, il va chercher les dossiers existants et en créer un en suivant pour la simulation suivante. Ainsi, on peut lancer plusieurs fois le script à la suite dans la queue du serveur (au hasard venus) pour en faire plusieurs en parallèle.
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-08-23"
-__version__ = "2.1.1"
+__date__ = "2011-10-28"
+__version__ = "2.1.4"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 from simulations import number_fill
@@ -866,10 +866,15 @@ class Disk(object):
 																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'temperature':"! Here we define the radius_min and radius_max for the 'a' sample of the temperature profile", 
-						'viscosity':"! constant viscosity of the disk [cm^2/s]"}
+						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
+						'nb_sample':"! number of point to the 1D radial grid of the disk", 
+						'is_dissipation':"a boolean to tell if there is dissipation of the disk in time or not", 
+						'inner_boundary_condition':"'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
+						'outer_boundary_condition':"'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation"}
 	
 	
-	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, viscosity=None):
+	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, viscosity=None, 
+	             nb_sample=None, is_dissipation=None, inner_boundary_condition=None, outer_boundary_condition=None):
 		"""initialisation of the class"""
 
 		self.parameter = {}
@@ -892,7 +897,17 @@ class Disk(object):
 		if (viscosity != None):
 			self.parameter['viscosity'] = viscosity
 			
-	
+		if (nb_sample != None):
+			self.parameter['nb_sample'] = nb_sample
+			
+		if (is_dissipation != None):
+			self.parameter['is_dissipation'] = is_dissipation
+			
+		if (inner_boundary_condition != None):
+			self.parameter['inner_boundary_condition'] = inner_boundary_condition
+		
+		if (outer_boundary_condition != None):
+			self.parameter['outer_boundary_condition'] = outer_boundary_condition
 	
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
