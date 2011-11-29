@@ -9,7 +9,7 @@ __version__ = "1.1"
 
 import mercury
 from random import uniform 
-import simulations
+import simulations_utilities
 
 def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	""" We will assume a certain number of parameters. For example, all bodies will be big bodies. 

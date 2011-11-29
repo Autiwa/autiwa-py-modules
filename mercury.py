@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""module mercury qui permet de lancer des simulations via python"""
-# Classe qui définit un environnement permettant de lancer et configurer une simulation mercury. Dans la pratique, il faut définir un script python pour une meta-simulation. Vous pouvez ensuite lancer ce script autant de fois que vous voulez, il va chercher les dossiers existants et en créer un en suivant pour la simulation suivante. Ainsi, on peut lancer plusieurs fois le script à la suite dans la queue du serveur (au hasard venus) pour en faire plusieurs en parallèle.
+"""module mercury qui définit des objets pour correspondant à chaque fichier de paramètre du code mercury (Chambers, 1999). Ces 
+objets ne définissent pas de manière plus simple de définir une simulation. C'est simplement un module qui donne la possibilité 
+de définir et d'écrire les fichiers de paramètres dans un script python."""
 __author__ = "Autiwa <autiwa@gmail.com>"
 __date__ = "2011-10-28"
 __version__ = "2.1.4"

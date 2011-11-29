@@ -1,0 +1,415 @@
+  .-"-._,-'_`-._,-'_`-._,-'_`-._,-'_`-,_,-'_`-,_,-'_`-,_,-'_`-,_,-'_`-,
+ (  ,-'_,-".>-'_,-".>-'_,-".>-'_,-".>-'_,-~.=-'_,-~.=-'_,-~.=-'_,-~-} ;
+  \ \.'_>-._`-<_>-._`-<_>-._`-<_>-._`-._=-._`-._=-._`-._=-._`-._~--. \
+  /\ \/ ,-' `-._,-' `-._,-' `-._,-' `-._,-' `-._,-' `-._,-' `-._`./ \ \
+ ( (`/ /                                                        `/ /.) )
+  \ \ / \                                                       / / \ /
+   \ ') )            README FOR THE MODULE 'MERCURY.PY'        ( (,\ \
+  / \ / /                                                       \ / \ \
+ ( (`/ /             The aim of this manuel is to provide        / /.) )
+  \ \ / \            explanations in the functions and          / / \ /
+   \ ') )            options of the class defined in           ( (,\ \
+  / \ / /            this module.                               \ / \ \
+ ( (`/ /                                                         / /.) )
+  \ \ / \                                                       / / \ /
+   \ ') )                                                      ( (,\ \
+  / \ y /                                                       \ y \ \
+ ( ( y /                                                         y /.) )
+  \ \ / \                                                       / / \ /
+   \ ') )   Version 1.1a                                      ( (,\ \
+  / \ / /   Author : Autiwa                                     \ / \ \
+ ( (`/ /    mail : autiwa@gmail.com                              / /.) )
+  \ \ / \       _       _       _       _       _       _       / / \ /
+   \ `.\ `-._,-'_`-._,-'_`-._,-'_`-._,-'_`-._,-'_`-._,-'_`-._,-'_/,\ \
+  ( `. `,~-._`-=,~-._`-=,~-._`-=,~-._`-=,~-._`-=,~-._`-=,~-._`-=,' ,\ \
+   `. `'_,-=_,-'_,-=_,-'_,-=_,-'_,-=_,-'_,-=_,-'_,-=_,-'_,-=_,-'_,"-' ;
+     `-' `-._,-' `-._,-' `-._,-' `-._,-' `-._,-' `-._,-' `-._,-' `-.-'
+
+
+Ce fichier est un mode d'emploi pour le module 'mercury.py' qui contient à ce jour 3 classes :
+_Planet
+_PlanetarySystem
+_Simulation
+
+Le but de ce fichier est d'expliquer comment se servir de ces 3 classes et quoi faire avec. Il est censé aussi expliquer un maximum d'options des classes et méthodes que j'ai essayé de faire modulables et pratiques à utiliser. 
+
+Les commentaires, reports de bugs et autres remarques (notamment sur de possibles améliorations ou implémentations à rajouter) sont les bienvenus. J'ai essayé de tester au maximum mais des bugs sont bien évidemment possibles. 
+
+Table of Contents
+0) HOW TO USE
+	1) How to define a simulation in short
+	2) What you should read and not
+
+I) class Simulation
+	0) what you should read at first
+	1) Aim of the class
+	2) Tips
+	3) Parameters
+	4) Example
+	5) Methods
+		a) startSimu()
+		b) restartSimu(folder)
+		c) generateOutputFiles(folder)
+
+II) class PlanetarySystem
+	0) what you should read at first
+	1) Aim of the class
+	2) Parameters
+	3) How to use
+	4) Example
+	5) Methods
+		a) append(*planets)
+		b) print/__str__
+		c) system[planet]/__getitem__
+		d) set_***** (where **** can be [m, a, e, I, d, m_star, epoch])
+		e) ==/__eq__
+		f) !=/__ne__
+		g) __nonzero__/bool()
+
+III) class Planet
+	1) Aim of the class
+	2) Parameters
+	3) How to use
+	4) Example
+	5) Methods
+		a) ==/__eq__
+		b) !=/__ne__
+		c) print/__str__
+
+IV) class Big
+	1) Aim of the class
+	2) Parameters
+	3) How to use/Example
+	5) Methods
+		a) write()
+		
+V) class Param
+	1) Aim of the class
+	2) Parameters
+	3) How to use/Example
+	5) Methods
+		a) write()
+		b) set_relative_time
+		c) set_time_format
+		
+VI) class Element
+	1) Aim of the class
+	2) Parameters
+	3) How to use/Example
+	5) Methods
+		a) write()
+		b) set_relative_time
+		c) set_time_format
+				
+
+
+
+=> faut que je rédige la doc de Simulation.
+Faut aussi que je teste les classes et fasse des tests unitaires pour Simulation.
+
+
+0) HOW TO USE
+	1) How to define a simulation in short
+		In short, I recommend you to use my example and copy paste them to know how to use the simulation script. You should let all the parameters in the definition of the instance because even if it's harder to read, it way simpler to modify a simulation and to know every parameters you can modify without looking at the manual.
+		
+	2) What you should read and not
+		You should read entirely how PlanetarySystem works and how Simulation works. The rest is not really usefull for you, at least for a common use and for the definition of your first simulation. 
+		You should NOT read how Big, Param and Element works. You don't need to understand how they work because they are used internly by another class. Don't waste time and energy to know how this works. 
+
+I) class Simulation
+	0) what you should read at first
+		If you want to read only one thing, read the section 4) example. It should give you the strict minimum to start with. Reading 1) and 2) can help you understand what the script does.
+		
+	1) Aim of the class
+		The aim is to define a mercury simulation. Each instance will represent a meta-simulation, that is to say a simulation whose properties will be common to several simulations. For example, you define element.in, param.in and a planetary system with a range of possible values that will be generated randomly and you can run the simulation a defined number of times, the script will put the outputs in differents folders named regards of their numbers and the name of the algorithm used to solve the computation.
+		
+	2) Tips
+		output_interval, time_format and relative_time are defined in both param.in and element.in. I chose to set them in the Param environment. They will be put also in Element in the instanciation of the simulation. That's why, even if it's possible to set them in Element, I DO NOT DO this in the example because the values we put in the definition of Element() will be OVERWRITTEN by those of Param() in the __init__ of Simulation. What you should know is : 
+		_ you can set output_interval, time_format and relative_time in Element() but you MUST NOT do this if you use this object in an Simulation object. 
+		_ you can learn how to use Param, Element and Big but you shouldn't until you explicitely need to know more about this because for a simple Simulation, you don't need to know how they works, Simulation handle theses problems for you.
+	
+	3) Parameters
+		element : an object of type 'Element'
+		param : an object of type 'Param'
+		system : an object whose type is 'PlanetarySystem'
+		meta_simu="test" : the name of the meta-simu. It will be the name of the directory. In this directory will be stored all the simulation that have the parameters of this meta-simulation (i.e all the simulation that we will run with one particuliar instance of the class. BTW several class can have the same directory. Nothing in the class forbid to define different meta-simulation and run them in the same directory. The user MUST be aware of that and be cautious as a consequence.)
+	
+	4) Example
+		systeme = PlanetarySystem([MJ for i in range(3)], [1, 3, 5], 0.001, 1e-5)
+		
+		paramin = Param(algorithme="BS", start_time=0, stop_time=100, nb_points=10000, h=0.2, accuracy=1.e-12, stop_integration="no", collisions="yes", fragmentation="no", time_format="years", relative_time="yes", output_precision="high", relativity="no", user_force="no", ejection_distance=1000, radius_star=0.005, central_mass=1.0, J2=0, J4=0, J6=0, changeover=3., periodic_effect=100)
+		
+		elementin = Element(format_sortie=" a21e e21e i8.4 g8.4 n8.4 l8.4 m21e ", coord="Cen")
+		
+		
+		test_simu = Simulation(elementin, paramin, systeme)
+		
+		test_simu.startSimu()
+		
+		# if the simulation has crashed, due to a lack of electricity for example : 
+		test_simu.restartSimu('name_of_the_folder')
+		
+		# If you want to extend the simulation for several years more :
+		test_simu.extendSimu('name_of_the_folder', 100) # for another 100 years
+	
+	5) Methods
+		a) startSimu()
+			simply start the simulation. This will also generate the output files "*.aei"
+		b) restartSimu(folder)
+			restart the simulation. This is usefull when mercury has crashed, for various reasons, lack of electricity for example. It uses the .dmp to continue the integration. If mercury return an error, the method try to run mercury using the .tmp instead of the .dmp, in case the .dmp are corrupted. But if this fails, then nothing is done. THIS PART WILL WORK ONLY IF MERCURY RETURN A RETURNCODE DIFFERENT FROM 0 IF SOMETHING WENT WRONG. I CAN'T ASSURE THAT FOR THE MOMENT
+		c) extendSimu(folder, suptime)
+			this method allow to continue the integration of the simulation contained in the folder 'folder' for 'suptime' years more. The resultant simulation will be put in another directory named 'folder_ext_by_'suptime''
+		d) generateOutputFiles(folder)
+			this method generate the .aei (by element6) in the folder named 'folder'. This method remove all the .aei that may exists in this directory before executing element6
+			
+	
+
+II) class PlanetarySystem
+	0) what you should read at first
+		At first, you should read the aim of the class, the parameters and how to use the class, no need to say that the examples are the most usefull part of the man. So you should read 1), 2), 3) and 4). The methods can be used but for a primary contact to the script, they are not important because you will certainly define the system entirely in the instanciation. 
+		
+	1) Aim of the class
+		The aim of the class is to provide a way to define a planetary system very simply. Indeed, you can define each parameter if you want, but you can also let the script generate random values.
+	
+	2) Parameters
+		m=[] : (in kg) mass of the planets. If a list is given, it will be assumed that each value represent a planet. If a tuple is given, it will be assumed that the first value is the minimum and the second the maximum value for random generation in a uniform interval. You can specify a third value as a list of planets that will be put in the system prior to a random generation. The list will be completed in order to have the good amount of planets for each orbital element.
+		a=[] : (in AU) semi major axis
+		e=[] : eccentricity
+		I=[] : (in degrees) orbital inclinaison
+		nb_planets=None : Give the number of planets. If none is given and we need one to generate random lists, it will be assumed to be the max of the length of the list m, a, e, I.
+		name=[] : list of names for the planets. Each element must be a string.
+		d=[] : density of the planets in g/cm³
+		g=(0, 360) : (in degrees) argument of pericenter (if nothing is given, the list will be filled with arbitrary values of angle in degrees)
+		n=(0, 360) : (in degrees) longitude of ascending node (if nothing is given, the list will be filled with arbitrary values of angle in degrees)
+		M=(0, 360) : (in degrees) mean anomaly (if nothing is given, the list will be filled with arbitrary values of angle in degrees)
+		m_star = 1.0 : (in solar mass) mass of the central body
+		epoch = 0 : the epoch of osculation in days (i.e. the time at which the initial coordinates/elements are valid). (allow mercury to compute backwards characteristics to put them as input values if epoch is different from the start time of the integration.
+		planets=None : By this variable, you can set the system directly by putting a list of planets. If set, it must be a tuple or list of elements of type 'Planet' (defined above)
+	
+	3) How to use
+		By default, the system will be empty if you define an instance without any argument. I recommend to always use the name of the parameters before its value when you define the planetary system. You don't have to do this, but it's easier to read and prevent errors of coding. 
+		
+		There is different ways to set a planetary system. First of all, if the argument 'planet' is defined and contain a list of object of type 'Planet', then the system will be set to this list of planets.
+		
+		If not, you can also do this : 
+			If nb_planets is set (an integer), pay attention to have the right number of values in the lists of parameters or you'll have an error.
+			
+			Each value in (m, a, e, I) can be set to a list of values. If at least one of them is set as a list of values, then the number of planets will be assumed to be the lenght of the longuest list defined in theses parameters.
+			
+		There is 3 types of values. 
+			a) (m, a, e, I) : They must be set (or equal to an empty list). They must have the same lenght
+			b) d : this parameter is optional. You can let it be empty or set it for all the planets
+			c) (g, n, M) : By default they are completed to have the right number of arguments. These all are angles that will be generated randomly.
+		
+		For all the parameters listed above (in a) and b) i.e [m, a, e, I, d]), you can do one of theses steps : 
+			_If a list is given, it will be assumed that each value represent a planet. 
+			_If a tuple is given, it will be assumed that the first value is the minimum and the second the maximum value for random generation in a uniform interval. 
+			_You can specify a third value (in the tuple of 2 values described above) as a list of planets that will be put in the system prior to a random generation. The list will be completed in order to have the good amount of planets for each orbital element.
+		
+		For g, n, M, you can : 
+			_do nothing and random values will be generated
+			_set a list of values that match the number of planets
+			
+	4) Example
+		>>> empty_system = PlanetarySystem()
+		>>> system1 = PlanetarySystem(m=[1.3, 2.4, 1.0], a=[1.0, 2.0, 4.0], e=(2.0, 4.0), I=(1, 5, [7.5]))
+		in system1, 3 random values between 2.0 and 4.0 will be generated. 2 values between 1 and 5 will be generated for I
+		
+		>>> system2 = PlanetarySystem(Planet(1, 2, 3, 4), Planet(1, 2, 3, 4), Planet(1, 2, 3, 4))
+		
+		On peut rajouter des planètes à un système existant
+		>>> system2.append(Planet(1, 2, 3, 4), Planet(1, 2, 3, 4))
+		>>> print system2
+		
+	5) Methods
+		a) append(*planets)
+			You can add planets in an existing system via system.append(planet). this method accept unknown number of arguments. Each argument must be an object of type 'Planet' that will be add to the system
+			
+			exemple : 
+			solar_system.append(saturn, pluto)
+			where saturn and pluto are two objects of type 'Planet'
+		
+		b) print/__str__
+		>>> print system
+		
+		c) system[planet]/__getitem__
+			this method return an objet of type 'planet'. You can reach the right planet by giving his name (case sensitive) or his number in the planetary system
+			
+			system[0] give the first planet. But system['PLANET1'] or system['Earth'] also work if a planet with such a name exist in the system.
+		
+		d) set_epoch and set_m_star
+			set epoch and m_star to the given value in argument.
+		
+		e) ==/__eq__
+			you can test if two planetary systems are the same or not. The method will only test if m, a, e, I, d are equal for each planet. The order of the planet can be different.
+			rmq : the test planet by planet is in fact exactly the same than for the 'Planet' class
+		f) !=/__ne__
+			the same than for __eq__ but return the opposite (in fact, the method is defined by using the definition of __eq__)
+
+		g) __nonzero__/bool()
+			return True or False. Return True if the System is correctedly set, and False if not.
+			if bool(system):
+				print "the system is correctly defined"
+
+III) class Planet
+	1) Aim of the class
+		The aim of the class is to provide a way to define a planet and his characteristics. 
+	
+	2) Parameters
+		m : (in kg) mass of the planets. 
+		a : (in AU) semi major axis
+		e : eccentricity
+		I : (in degrees) orbital inclinaison
+		d=None : density of the planets in g/cm³
+		g=None : (in degrees) argument of pericenter
+		n=None : (in degrees) longitude of ascending node
+		M=None : (in degrees) mean anomaly
+		name=None : The name of the planet. If none is given, a default name will be set, equal to PLANETEi where i is the number of instance of the class Planet
+	
+	3) How to use
+		Concretely, you MUST define at least m, a, e and I in this order (if you don't specify the name of the parameter by "m=3" for example). By default, the density and g, n, M will simply not be defined and equal to None. The name, if not specified, will be set to a default name whose syntax will be a prefix (currently "PLANET") and the number of the instance. For example, if you already have defined 3 planets, and define a 4th with no name, his name will be "PLANET4".
+	
+	4) Example
+		>>> planet1 = Planet(MJ, 1, 0.1, 0.001, d=1.2, g=3.5, n=5.6, M=8.2)
+		>>> print planet1
+
+		>>> planet2 = Planet(MJ, 1, 0.1, 0.001, name="mercure")
+		>>> print planet2
+
+	5) Methods
+		a) ==/__eq__
+		the test is based on the correspondance of m, a, e and I. If d is defined, it is also tested.
+		
+		>>> print planet1 == planet2
+		False
+		
+		b) !=/__ne__
+		>>> print planet1 != planet2
+		True
+		
+		c) print/__str__
+		>>> print planet1
+
+IV) class Big
+	1) Aim of the class
+		The goal is to define the file 'big.in'. We use a planetary system to defined this. 
+	2) Parameters
+		Only one parameter that must be an object of type 'PlanetarySystem'
+	3) How to use/Example
+		to define an object, we simply do :
+		>>> big = Big(system1)
+		
+		To write the file, we use
+		>>> big.write()
+	5) Methods
+		a) write()
+			The write() method simply create a file named 'big.in' in the current working directory
+
+V) class Param
+	1) Aim of the class
+		The goal is to define the file 'param.in'.
+	2) Parameters
+		algorithme : ("MVS", "BS", "BS2", "RADAU", "HYBRID")
+		start_time : time when the simulation begin
+		stop_time : time when the simulation stop
+		nb_points : number of outputs we want
+		h : timestep in days
+		accuracy = 1.e-12 : precision we want for energy between timesteps
+		stop_integration = "no" : (yes/no) if we want to stop integration after a close encounter
+		collisions = "yes" : (yes/no) if we want to allow collisions
+		fragmentation = "no" : (yes/no) if we allow fragmentation during collision (curently not implemented, so no effects)
+		time_format = "years" : sous quel format est écrit le temps (years, days)
+		relative_time = "yes" : (yes/no) est-ce que le temps au cours de la simulation doit être exprimé avec pour référence le début de la simulation (yes) ou pas (dans le cas où la date a une signification dans la simulation)
+		output_precision = "high" : (low, medium, high) for the precision we want for the outputs (4, 9, 15)
+		relativity = "no" : (yes/no) if we want to include relativity (currently not implemented)
+		user_force = "no" : (yes/no) if we want to take into account the user-defined force put in the associated sub-routine
+		ejection_distance = 1000 : (in au) distance from the star where objets will be treated as ejected (and then erased for the next timestep)
+		radius_star = 0.005 : (in au) radius of the central body
+		central_mass = 1.0 : (in solar mass) the mass of the central body
+		J2 = 0 : J2 moment of the central body in units of its radius^2
+		J4 = 0 : J4 moment of the central body in units of its radius^4
+		J6 = 0 : J6 moment of the central body in units of its radius^6
+		changeover = 3. : (in hill radii) distance from where the HYBRID algorithm will change from MVS to BS
+		periodic effect = 100 : The number of timesteps between other periodic effects. At present this controls how often mercury6_1.for checks for ejections and recomputes objects' Hill radii.
+		
+	3) How to use/Example
+		to define an object, we simply do :
+		>>> param = Param("BS", 0, 10000, 10000, 0.2)
+		
+		To write the file, we use
+		>>> param.write()
+	5) Methods
+		a) write()
+			The write() method simply create a file named 'param.in' in the current working directory
+		
+		b) set_relative_time
+			only take one argument, and set the relative_time to "yes" or "no"
+			
+			param.set_relative_time("yes")
+			
+			RMQ : this method has been created because relative_time is a parameter common to both param.in and element.in. In order to define the same value for the 2 objects
+			
+		c) set_time_format
+			only take one argument, and set the time_format to "years" or "days"
+			
+			param.set_time_format("years")
+			
+			RMQ : this method has been created because time_format is a parameter common to both param.in and element.in. In order to define the same value for the 2 objects
+		
+
+VI) class Element
+	1) Aim of the class
+		The goal is to define the file 'element.in'. We use a planetary system to defined this. 
+	2) Parameters
+		output_interval = "365.25" : (in days) interval between two outputs (i.e two instants when we write orbital elements)
+		format_sortie = " a21e e21e i8.4 g8.4 n8.4 l8.4 m21e "  : variables we want to write and their associated formats (fortran notation)
+						The code letters are:
+						a = semi-major axis (in AU)
+						b = apocentre distance (in AU, b is short for Big q)
+						d = density (g per cm^3)
+						e = eccentricity
+						f = true anomaly (degrees)
+						g = argument of perihelion (degrees)
+						i = inclination (degrees)
+						l = mean anomaly (degrees)
+						m = mass (solar masses)
+						n = longitude of ascending node
+						o = obliquity (degrees)
+						p = longitude of perihelion (degrees)
+						q = pericentre distance (AU)
+						r = radial distance (AU)
+						s = spin period (days)
+						x, y or z = Cartesian coordinates x, y or z
+						u, v or w = Cartesian velocities vx, vy or vz
+						Note that if you choose to express an element using a large number
+						of significant figures, the last few digits might not be meaningful
+						if the output precision of the original integation was low or medium.
+		coord = "Cen" : (central body, barycentric, Jacobi) coordonate type we want for speed and position. 
+		time_format = "years" : (years, days) in what format is written time
+		relative_time = "yes" : (yes/no) is the time during the simulation must be written with respect to the initial time (yes) or not (no) (usefull when the time have a signification, like in our solar system)
+		
+	3) How to use/Example
+		to define an object, we simply do :
+		>>> element = Element()
+		or 
+		>>> element = Element(output_interval="365.25", format_sortie=" a21e e21e i8.4 g8.4 n8.4 l8.4 m21e ", coord="Cen", time_format="years", relative_time="yes")
+		
+		To write the file, we use
+		>>> element.write()
+	5) Methods
+		a) write()
+			The write() method simply create a file named 'element.in' in the current working directory
+
+		b) set_relative_time
+			only take one argument, and set the relative_time to "yes" or "no"
+			
+			element.set_relative_time("yes")
+			
+			RMQ : this method has been created because relative_time is a parameter common to both param.in and element.in. In order to define the same value for the 2 objects
+			
+		c) set_time_format
+			only take one argument, and set the time_format to "years" or "days"
+			
+			element.set_time_format("years")
+			
+			RMQ : this method has been created because time_format is a parameter common to both param.in and element.in. In order to define the same value for the 2 objects

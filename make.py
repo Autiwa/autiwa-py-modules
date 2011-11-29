@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "26 août 2011"
-__version__ = "$Revision: 1.7.0 $"
+__date__ = "14 novembre 2011"
+__version__ = "$Revision: 1.7.1 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -408,7 +408,10 @@ class sourceFile(object):
     
     dependances = []
     for mod in self.used:
-      source = sourceFile.findModule[mod]
+      try:
+        source = sourceFile.findModule[mod]
+      except:
+        print("Error: Unable to locate the module '"+mod+"'")
       obj = string.replace(source.filename,'.f90','.o')
       dependances.append(obj)
     
