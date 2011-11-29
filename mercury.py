@@ -4,8 +4,8 @@
 objets ne définissent pas de manière plus simple de définir une simulation. C'est simplement un module qui donne la possibilité 
 de définir et d'écrire les fichiers de paramètres dans un script python."""
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-10-28"
-__version__ = "2.1.4"
+__date__ = "2011-11-29"
+__version__ = "2.1.5"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 from simulations import number_fill
@@ -862,20 +862,20 @@ class Disk(object):
 	
 	COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
 						'adiabatic_index':"! the adiabatic index for the gas equation of state", 
-						'mean_molecular_weight':"! ! the mean molecular weight in mass of a proton", 
+						'mean_molecular_weight':"! the mean molecular weight in mass of a proton", 
 						'surface_density':"! Here we define the power law for surface density sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
 																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
-						'temperature':"! Here we define the radius_min and radius_max for the 'a' sample of the temperature profile", 
+						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
-						'nb_sample':"! number of point to the 1D radial grid of the disk", 
-						'is_dissipation':"a boolean to tell if there is dissipation of the disk in time or not", 
-						'inner_boundary_condition':"'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
-						'outer_boundary_condition':"'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation"}
+						'sample':"! number of point to the 1D radial grid of the disk", 
+						'is_dissipation':"! a boolean to tell if there is dissipation of the disk in time or not", 
+						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
+						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation"}
 	
 	
-	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, temperature=None, viscosity=None, 
-	             nb_sample=None, is_dissipation=None, inner_boundary_condition=None, outer_boundary_condition=None):
+	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
+	             sample=None, is_dissipation=None, inner_boundary_condition=None, outer_boundary_condition=None):
 		"""initialisation of the class"""
 
 		self.parameter = {}
@@ -892,14 +892,14 @@ class Disk(object):
 		if (surface_density != None):
 			self.parameter['surface_density'] = surface_density
 		
-		if (temperature != None):
-			self.parameter['temperature'] = temperature
+		if (disk_edges != None):
+			self.parameter['disk_edges'] = disk_edges
 		
 		if (viscosity != None):
 			self.parameter['viscosity'] = viscosity
 			
-		if (nb_sample != None):
-			self.parameter['nb_sample'] = nb_sample
+		if (sample != None):
+			self.parameter['sample'] = sample
 			
 		if (is_dissipation != None):
 			self.parameter['is_dissipation'] = is_dissipation
@@ -920,7 +920,7 @@ class Disk(object):
 		
 		for (key, value) in self.parameter.items():
 			disk.write("\n")
-			disk.write(Disk.COMMENT[key]+"\n")
+			disk.write(Disk.COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
 			if (type(value) in (list, tuple)):
 				disk.write(key+" = "+" ".join(map(str, value))+"\n")
 			else:
@@ -1245,7 +1245,8 @@ if __name__=='__main__':
 	messagein = Message()
 	messagein.write()
 	
-	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(1700, 0.5), temperature=(510, 1), alpha=0.005)
+	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(500, 0.5), temperature=(510, 1), 
+	          viscosity=1e15, nb_sample=200, is_dissipation=False, inner_boundary_condition='open', outer_boundary_condition='open')
 	diskin.write()
 	
 	pdb.set_trace()
