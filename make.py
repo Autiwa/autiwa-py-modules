@@ -3,7 +3,7 @@
 
 __author__ = "Autiwa <autiwa@gmail.com>"
 __date__ = "14 novembre 2011"
-__version__ = "$Revision: 1.7.1 $"
+__version__ = "$Revision: 1.7.2 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -579,11 +579,18 @@ class sourceFile(object):
 
     return (architecture, parent_x, parent_y, tree_width)
 
-  def compile(self):
+  def compile(self, parent_dependencies=[]):
     """method that check dependencies and try to compile
+    
+    Parameter : 
+    parent_dependencies=[] : list that store all the parent dependencies of the current file, namely, all the module 
+    that MUST NOT be used inside the current module, else we will have an infinite loop.
     
     Beware, there MUST NOT be inter dependant modules.
     """
+    
+    parent_dependencies.append(self.name)
+    
     if not(self.isCompiled):
       # We only store, for the moment, the first order dependencies.
       self.dependencies = self.__getFirstOrderDependence()
@@ -592,12 +599,21 @@ class sourceFile(object):
       module_sources = []
       for module in self.used:
         module_sources.append(sourceFile.findModule[module])
+        
+      # For each object, we check if there is loop call of modules. If that's the case, return an error
+      for name in self.used:
+        if name in parent_dependencies:
+          error_message = "The module '"+self.name+"' try to use the module '"+name+"' that already "+ \
+                          "use the module '"+self.name+"'. So there is an infinite loop that is not correct."
+          raise NameError(error_message)
       
       # For each object, we compile it if it's not already the case.
       for source in module_sources:
         if not(source.isCompiled):
-          source.compile()
-      
+          # the list() is here to ensure not to have a pointer and share the list. If not, the list of parent_dependencies will 
+          # not be correct and contains all the previous parent dependencies. 
+          source.compile(list(parent_dependencies)) 
+          
       # We complete the dependencies list now that all used modules
       # have been compiled, they must have a complete list of 
       # their own dependencies.
