@@ -13,6 +13,7 @@ function to round values with significative round and so on."""
 from random import uniform, gauss
 from constants import *
 from math import *
+import autiwa
 import pdb
 import subprocess
 
@@ -146,6 +147,95 @@ def writeRunjobPBS(command, queue, nb_proc=1):
 	script.close()
 
 	setExecutionRight(NAME_SCRIPT)
+	
+class Job_PBS(object):
+	"""class that define an object equivalent to a script needed to run a job on a PBS job engine
+	
+	For the moment, the class only allows us to define non parallel jobs that need only 1 proc.
+	
+	Parameters:
+	command : the name of the command (or script) to run
+	directory="." : the name of the directory where the job will be launched. By default, it will be the current working directory.
+	walltime='00:10:00' : the maximum expected length of the job. If it's a number, then this will be the length in hour 
+	                      (converted in hour minutes seconds so you can put decimal point values). Else, you must specify the walltime 
+	                       with the following form 'hh:mm:ss'. 
+	name="simulation.sh" : the name of the script that will contains the commands to launch the job
+	"""
+	
+	
+	def __init__(self, command, directory='.', walltime='00:10:00', name="simulation.sh"):
+		"""initialisation of the class"""
+		
+		self.command = command
+		
+		self.directory = directory
+		
+		self.name = name
+		
+		self.proc_per_node = 1
+		self.nodes = 1
+		
+		if (type(walltime) == str):
+			self.walltime = walltime
+		elif (type(walltime) in [int, float]):
+			rest = walltime
+			hour = int(rest)
+			
+			rest = (rest - hour) * 60.
+			minutes = int(rest)
+			
+			rest = (rest - minutes) * 60.
+			seconds = int(rest)
+			self.walltime = str(hour)+":"+number_fill(minutes,2)+":"+number_fill(seconds,2)
+		else:
+			raise TypeError("The argument walltime must be a number of hour or a string of the form 'hh:mm:ss'")
+		
+		
+	
+	def write(self):
+		"""write all the data in a file named 'element.in' in the current working directory"""
+		
+		script = open(self.name, 'w')
+		script.write("#!/bin/sh\n")
+		script.write("\n")
+		script.write("#############################\n")
+		script.write("\n")
+		script.write("# Your job name\n")
+		script.write("#PBS -N "+str(self.command)+"\n")
+		script.write("\n")
+		script.write("# Specify the working directory\n")
+		script.write("#PBS -d "+str(self.directory)+"\n")
+		script.write("\n")
+		script.write("# walltime (hh:mm::ss)\n")
+		script.write("#PBS -l walltime="+self.walltime+"\n")
+		script.write("\n")
+		script.write("# Specify the number of nodes(nodes=) and the number of cores per nodes(ppn=) to be used\n")
+		script.write("#PBS -l nodes="+str(self.nodes)+":ppn="+str(self.proc_per_node)+"\n")
+		script.write("\n")
+		script.write("#############################\n")
+		script.write("\n")
+		script.write("# modules cleaning\n")
+		script.write(". /etc/profile.d/modules.sh\n")
+		script.write("module purge\n")
+		script.write("\n")
+		script.write("# useful informations to print\n")
+		script.write("echo \"#############################\" \n")
+		script.write("echo \"User:\" $USER\n")
+		script.write("echo \"Date:\" `date`\n")
+		script.write("echo \"Host:\" `hostname`\n")
+		script.write("echo \"Directory:\" `pwd`\n")
+		script.write("echo \"PBS_JOBID:\" $PBS_JOBID\n")
+		script.write("echo \"PBS_NODEFILE: \" `cat $PBS_NODEFILE | uniq`\n")
+		script.write("echo \"#############################\" \n")
+		script.write("\n")
+		script.write("#############################\n")
+		script.write("\n")
+		script.write("# fake to work\n")
+		script.write("sleep 1m\n")
+		script.write("\n")
+		script.write("# all done\n")
+		script.write("echo \"Job finished\" \n")
+		script.close()
 
 def setParameter(parameter, nb_planets):
 	"""This function will generate the parameters list given a tuple a values.. 
@@ -306,8 +396,10 @@ def number_fill(number, fill):
 	
 	return number
 
-
 if __name__=='__main__':
-  print("No tests are implemented so far.")
+	autiwa.printCR("Test of Job_PBS...")
+	job = Job_PBS("ls", directory='.', walltime=1, name="simulation.sh")
+	job.write()
+	print("Test of Job_PBS...ok")
 
 

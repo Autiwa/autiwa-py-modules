@@ -390,6 +390,11 @@ def lecture_variable(nom, colonnes=''):
     
     return sortie
   
+def printCR(text):
+  """function that allow us to display on the screen some text in order to rewrite it afterwards"""
+  
+  sys.stdout.write(text+chr(13))
+  sys.stdout.flush()
 
 #http://www.lfd.uci.edu/~gohlke/code/transformations.py.html
 def rotation_matrix(angle, direction):
