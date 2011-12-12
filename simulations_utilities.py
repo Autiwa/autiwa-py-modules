@@ -200,7 +200,7 @@ class Job_PBS(object):
 		script.write("#############################\n")
 		script.write("\n")
 		script.write("# Your job name\n")
-		script.write("#PBS -N "+str(self.command)+"\n")
+		script.write("#PBS -N "+str(self.name)+"\n")
 		script.write("\n")
 		script.write("# Specify the working directory\n")
 		script.write("#PBS -d "+str(self.directory)+"\n")
