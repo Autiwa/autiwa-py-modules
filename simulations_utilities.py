@@ -48,7 +48,7 @@ def str2str(value):
 	"""function that convert a string into a string. That might be weird to say, 
 	but this function aim to suppress any '"' or "'" in string
 	
-	Return a string without extremal quotes that might exist
+	Return a string without extrenal quotes that might exist
 	"""
 	
 	# We suppress extremal white spaces
@@ -191,9 +191,8 @@ class Job_PBS(object):
 			raise TypeError("The argument walltime must be a number of hour or a string of the form 'hh:mm:ss'")
 		
 		
-	
 	def write(self):
-		"""write all the data in a file named 'element.in' in the current working directory"""
+		"""write all the data in a file named self.name in the current working directory"""
 		
 		script = open(self.name, 'w')
 		script.write("#!/bin/sh\n")
@@ -230,11 +229,33 @@ class Job_PBS(object):
 		script.write("\n")
 		script.write("#############################\n")
 		script.write("\n")
-		script.write("# fake to work\n")
-		script.write("sleep 1m\n")
+		script.write("# The job of the script is launched here\n")
+		script.write(self.command)
 		script.write("\n")
 		script.write("# all done\n")
 		script.write("echo \"Job finished\" \n")
+		script.close()
+
+class SimpleJob(object):
+	"""Class that allow us to define a script for simple jobs that only need a command line as argument
+	
+	Parameter:
+	command : the commandes you want to launch
+	"""
+	
+	def __init__(self, command, name="simulation.sh"):
+		"""initialisation of the class"""
+		
+		self.name = name
+		
+		self.command = str(command)
+		
+	def write(self):
+		"""write all the data in a file named self.name in the current working directory"""
+		script = open("simulation.sh", 'w')
+		script.write("#!/bin/bash\n")
+		script.write("\n")
+		script.write(self.command)
 		script.close()
 
 def setParameter(parameter, nb_planets):
@@ -385,21 +406,51 @@ def number_fill(number, fill):
 	0018
 	"""
 	
+	if (type(number) != int) or (type(fill) != int):
+		raise TypeError("'number' and 'fill' must be integers")
+	
 	number = str(number)
+	size = len(number)
 	
-	if (len(number) > fill):
+	if (size > fill):
 		raise ValueError("The desired length of the string is not sufficient to display the number")
+	else:
+		number = "0"*(fill - size) + number
 	
-	# tant qu'on n'a pas la bonne taille, on rajoute des "0" Ã  gauche.
+	# While the total length is not sufficient, we add '0' to the left.
 	while (len(number) < fill):
 		number = "0"+number
 	
 	return number
 
 if __name__=='__main__':
+	autiwa.printCR("Test of str2bool...")
+	tests_outputs = ""
+	for input in ["1", 'true', '.true.', 'True', 'TRUE', 'TrUe']:
+		output = str2bool(input)
+		if (output != True):
+			tests_outputs += "str2bool doesn't return 'True' when we give in parameter : "+input+"\n"
+			
+	
+	for input in ["0", 'false', '.false.', 'False', 'FALSE', 'FaLse']:
+		output = str2bool(input)
+		if (output != False):
+			tests_outputs += "str2bool doesn't return 'False' when we give in parameter : "+input+"\n"
+	
+	if (tests_outputs == ""):
+		print("Test of str2bool : OK")
+	else:
+		print("Test of str2bool : FAIL")
+		print(tests_outputs)
+	
 	autiwa.printCR("Test of Job_PBS...")
 	job = Job_PBS("ls", directory='.', walltime=1, name="simulation.sh")
 	job.write()
-	print("Test of Job_PBS...ok")
+	print("Test of Job_PBS : OK")
+	
+	autiwa.printCR("Test of SimpleJob...")
+	job = SimpleJob("ls", name="simulation.sh")
+	job.write()
+	print("Test of SimpleJob : OK")
 
 

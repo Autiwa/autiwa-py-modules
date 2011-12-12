@@ -8,7 +8,7 @@ __date__ = "2011-11-29"
 __version__ = "2.1.5"
 
 from autiwa import AutiwaObject  # We only import what interests us.
-from simulations import number_fill
+from simulations_utilies import number_fill
 import os
 import pdb # usefull to debug with pdb.set_trace()
 
