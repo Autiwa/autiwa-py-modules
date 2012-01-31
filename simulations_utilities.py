@@ -130,7 +130,7 @@ def writeRunjobPBS(command):
 	qsub = "qsub "+command
 	
 	script = open(NAME_SCRIPT, 'w')
-	script.write("stdout=$("+qsub+")# execute the command and store the output in '$stdout'\n")
+	script.write("stdout=$("+qsub+") # execute the command and store the output in '$stdout'\n")
 	script.write("echo $stdout # display the output of the qsub\n")
 	script.write("echo `pwd` ':' $stdout>>~/qsub.log\n")
 	script.close()
