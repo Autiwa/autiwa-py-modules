@@ -205,6 +205,7 @@ class Job_PBS(object):
 		script.write("# modules cleaning\n")
 		script.write("module purge\n")
 		script.write("module add torque\n")
+		script.write("module add gcc\n")
 		script.write("\n")
 		script.write("# useful informations to print\n")
 		script.write("echo \"#############################\" \n")
