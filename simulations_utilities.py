@@ -104,45 +104,34 @@ def writeRunjobSGE(command, queue, nb_proc=1):
 	setExecutionRight(NAME_SCRIPT)
 	
 
-def writeRunjobPBS(command, queue, nb_proc=1):
+def writeRunjobPBS(command):
 	"""function that creates a script named 'runjob' that
 	will run a job on a queue. If the number of processor exceed 1, then
 	 the function will try to launch the job on every queue. If not, it
 	 will launch the job on all the parallel queues.
 	 
-	This script is done for the Torque+Maui task scheduler, alias PBS.
+	This script is done for the Torque+Maui task scheduler, alias PBS. For the moment, the command is really simple because all the
+	parameters
 
 	Parameters
-	nb_proc=1 : (integer) number of processor we want to use. By default, it will be 1
-	queue : the queue you want to use to launch your job. You can use the various syntaxes allowed by the job scheduler. 
 	command : The command you want the job to launch. 
 	
 	Example : 
-	writeRunjob("./mercury", "arguin1.q,arguin2.q")
+	writeRunjob("./mercury")
 	will create a "runjob" script that will look like : 
-	qsub -q arguin1.q,arguin2.q ./mercury
+	qsub ./mercury
 
 	Return : Nothing
 	"""
 
 	NAME_SCRIPT = "runjob"
-
 	
 	
-	if (queue == ""):
-		queue_append = ""
-	else:
-		queue_append = " -q "+queue
-	
-	
-	if (nb_proc > 1):
-		qsub = "qsub -pe mpi "+str(nb_proc)+queue_append+" "+command
-	else:
-		qsub = "qsub"+queue_append+" "+command
+	qsub = "qsub "+command
 	
 	script = open(NAME_SCRIPT, 'w')
-	script.write("stdout=$("+qsub+")\n")
-	script.write("echo $stdout\n")
+	script.write("stdout=$("+qsub+")# execute the command and store the output in '$stdout'\n")
+	script.write("echo $stdout # display the output of the qsub\n")
 	script.write("echo `pwd` ':' $stdout>>~/qsub.log\n")
 	script.close()
 
@@ -214,8 +203,8 @@ class Job_PBS(object):
 		script.write("#############################\n")
 		script.write("\n")
 		script.write("# modules cleaning\n")
-		script.write(". /etc/profile.d/modules.sh\n")
 		script.write("module purge\n")
+		script.write("module add torque\n")
 		script.write("\n")
 		script.write("# useful informations to print\n")
 		script.write("echo \"#############################\" \n")
@@ -224,6 +213,7 @@ class Job_PBS(object):
 		script.write("echo \"Host:\" `hostname`\n")
 		script.write("echo \"Directory:\" `pwd`\n")
 		script.write("echo \"PBS_JOBID:\" $PBS_JOBID\n")
+		script.write("echo \"PBS_O_WORKDIR:\" $PBS_O_WORKDIR\n")
 		script.write("echo \"PBS_NODEFILE: \" `cat $PBS_NODEFILE | uniq`\n")
 		script.write("echo \"#############################\" \n")
 		script.write("\n")
@@ -233,7 +223,7 @@ class Job_PBS(object):
 		script.write(self.command)
 		script.write("\n")
 		script.write("# all done\n")
-		script.write("echo \"Job finished\" \n")
+		script.write("echo `date` \"Job finished\" \n")
 		script.close()
 
 class SimpleJob(object):

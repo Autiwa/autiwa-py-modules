@@ -558,6 +558,16 @@ class Element(object):
 		self.time_format = time_format
 		self.relative_time = relative_time
 	
+	def set_format_sortie(self, format_sortie):
+		"""explicitely set the format_sortie variable
+		
+		Parameter
+		format_sortie : (in days) interval between two outputs (i.e two instants when we write orbital elements). The default format is :
+		" a21e e21e i8.4 g8.4 n8.4 l8.4 m21e "
+		"""
+		
+		self.format_sortie = str(format_sortie)
+	
 	def set_output_interval(self, output_interval):
 		"""explicitely set the output_interval variable
 		
@@ -583,6 +593,36 @@ class Element(object):
 		relative_time : (yes/no) est-ce que le temps au cours de la simulation doit être exprimé avec pour référence le début de la simulation (yes) ou pas (dans le cas où la date a une signification dans la simulation)
 		"""
 		self.relative_time = relative_time
+	
+	def read(self, filename="element.in"):
+		"""method that allow to get, from a file 'element.in' all the parameters at once
+		
+		Parameter 
+		filename="element.in" : by default, the name is the regular name. But to continue the integration, we must define 
+		the file in param.dmp, so we must be able to specify a filename"""
+		
+		paramin = open(filename, 'r')
+		tab = paramin.readlines()
+		paramin.close()
+		
+		parameters = []
+		for line in tab:
+			if (line[0] != ")"):
+				parameters.append(line)
+		
+		for i in [0, 2, 3, 4, 5]:
+				tmp = parameters[i].split("=")[-1]
+				tmp = tmp[:-1] # We take off the ending '\n'
+				tmp = tmp.split()[0] # we take of extra spaces before and after
+				parameters[i] = tmp 
+		
+		self.coord = parameters[2]
+		self.output_interval = float(parameters[3])
+		self.time_format = parameters[4]
+		self.relative_time = parameters[5]
+		self.format_sortie = parameters[6]
+		# if perculiar planets only are used, you must add some lines here to get the 
+		# last lines of the parameters array that are not currently stored
 	
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
@@ -651,11 +691,11 @@ class Param(object):
 				") These parameters do not need to be adjusted often:\n" + \
 				")---------------------------------------------------------------------\n"
 	
-	def __init__(self, algorithme, start_time, stop_time, h, nb_points=None, accuracy=1.e-12, 
+	def __init__(self, algorithme, start_time, stop_time, h, accuracy=1.e-12, 
 	stop_integration="no", collisions="yes", fragmentation="no", time_format="years", 
 	relative_time="yes", output_precision="high", relativity="no", user_force="no", 
 	ejection_distance=1000, radius_star=0.005, central_mass=1.0, J2=0, J4=0, J6=0, 
-	changeover=3., periodic_effect=100, data_dump=None, output_interval=None):
+	changeover=3., periodic_effect=100, data_dump=500, output_interval=365.25):
 		"""initialise the class and store the datas
 		
 		time_format and relative_time are common information with element and param. Do something to combine thoses data
@@ -663,7 +703,7 @@ class Param(object):
 		
 		self.algorithme = algorithme
 		self.start_time, self.stop_time = start_time, stop_time
-		self.nb_points = nb_points
+		self.output_interval = output_interval
 		self.h = h
 		self.accuracy = accuracy
 		self.stop_integration = stop_integration
@@ -679,15 +719,9 @@ class Param(object):
 		self.central_mass = central_mass
 		self.J2, self.J4, self.J6 = J2, J4, J6
 		self.changeover = changeover
+		self.data_dump = data_dump
 		self.periodic_effect = periodic_effect
 		
-		# if nb_points is not set, so data_dump and output_interval MUST be set
-		if (self.nb_points == None):
-			self.data_dump = data_dump
-			self.output_interval = output_interval
-		else:
-			self.data_dump = abs(int(self.temps_integration / (self.nb_points * self.h)))
-			self.output_interval = self.temps_integration/float(self.nb_points) 
 	
 	@property
 	def temps_integration(self):
@@ -757,6 +791,53 @@ class Param(object):
 		"""
 		
 		return self.relative_time
+	
+	def read(self, filename="param.in"):
+		"""method that allow to get, from a file 'param.in' all the parameters at once
+		
+		Parameter 
+		filename="param.in" : by default, the name is the regular name. But to continue the integration, we must define 
+		the file in param.dmp, so we must be able to specify a filename"""
+		
+		paramin = open(filename, 'r')
+		tab = paramin.readlines()
+		paramin.close()
+		
+		parameters = []
+		for line in tab:
+			if (line[0] != ")"):
+				tmp = line.split("=")[-1]
+				tmp = tmp[:-1] # We take off the ending '\n'
+				tmp = tmp.split()[0] # we take of extra spaces before and after
+				parameters.append(tmp) # we take the last element [-1] of the split, but without the last caracter (which is '\n')
+		
+		self.algorithme = parameters[0]
+		self.start_time = float(parameters[1])
+		self.stop_time = float(parameters[2])
+		self.output_interval = float(parameters[3])
+		self.h = float(parameters[4])
+		self.accuracy = float(parameters[5])
+		self.stop_integration = parameters[6]
+		self.collisions = parameters[7]
+		self.fragmentation = parameters[8]
+		self.time_format = parameters[9]
+		self.relative_time = parameters[10]
+		self.output_precision = parameters[11]
+		# Not used
+		self.relativity = parameters[13]
+		self.user_force = parameters[14]
+		self.ejection_distance = float(parameters[15])
+		self.radius_star = float(parameters[16])
+		self.central_mass = float(parameters[17])
+		self.J2 = float(parameters[18])
+		self.J4 = float(parameters[19])
+		self.J6 = float(parameters[20])
+		# Not used
+		# Not used
+		self.changeover = float(parameters[23])
+		self.data_dump = int(parameters[24])
+		self.periodic_effect = int(parameters[25])
+		
 	
 	def write(self, filename="param.in"):
 		"""write all the data in a file named 'param.in' in the current working directory
