@@ -567,13 +567,14 @@ def significativeRound(real,roundNumber):
 		else:
 				return -truncatedNumber
 
-def colorList(nb_colors):
+def colorList(nb_colors, exclude=['ffffff']):
 	"""Function that return a list of colors given the number of different colors we want. 
 	It is still a simple version of the function that may contain bugs, especially for large values of colors. 
 	The color 'white' is prohibited here, but not 'black'
 	
 	Parameter
 	nb_colors : The number of different colors we want.
+	exclude=['ffffff'] : The colors we do not want in our list
 	
 	Return 
 	A list of colors, with the desired number of elements
@@ -581,8 +582,12 @@ def colorList(nb_colors):
 	from math import ceil
 	from random import shuffle
 	
-	individual_colors = int(ceil((nb_colors + 1)**0.33)) # We add one because 'ffffff' is sometimes removed. We want to make sure we can generate enough colors
-
+	excludeColors = list(exclude)
+	
+	# We add the length of the excludedColors array. Maybe some of them will not be generated in our case with the individual 
+	# colors taken into account, but we want, at least, to generate enough colors. 
+	individual_colors = int(ceil((nb_colors + len(exclude))**0.33)) 
+	
 	colors = [0, 255, 127]
 	iteration = 0
 	# We search for all individual values (for R, G, B) that we need to define at least the number of colors we want.
@@ -604,22 +609,23 @@ def colorList(nb_colors):
 	if (nb_colors <=6):
 		colors.remove(127)
 	
-	#~ HEXcolors = []
-	#~ nb = 0
-	#~ for R in colors:
-		#~ for G in colors:
-			#~ for B in colors:
-				#~ colorTemp = hexColor(R)+hexColor(G)+hexColor(B)
-				#~ if (colorTemp != 'ffffff'):
-					#~ HEXcolors.append(colorTemp)
-					#~ nb += 1
-				#~ 
-				#~ if (nb == nb_colors):
-					#~ shuffle(HEXcolors) # We change the order of elements in the list because the algorithm is not the best to put different colors close from each others
-					#~ return HEXcolors
+	
+	
 	HEXcolors = []
-	excludeColors = ['ffffff']
 	nb = 0
+	
+	if (nb_colors == 3):
+		for colorTemp in ['ff0000', '00ff00', '0000ff']:
+			if (colorTemp not in excludeColors):
+				HEXcolors.append(colorTemp)
+				nb += 1
+		if (nb == 3):
+			return HEXcolors
+	
+	
+	HEXcolors = []
+	nb = 0
+	
 	for i in range(len(colors)):
 		subcolors = colors[0:i+1]
 		for R in subcolors:
@@ -634,21 +640,7 @@ def colorList(nb_colors):
 					
 					if (nb == nb_colors):
 						return HEXcolors
-				
-	#~ for i in range(len(colors)):
-		#~ R = colors[i]
-		#~ for j in range(0,i+1):
-			#~ G = colors[j]
-			#~ for k in range(0,i+1):
-				#~ B = colors[k]
-				#~ colorTemp = hexColor(R)+hexColor(G)+hexColor(B)
-				#~ if (colorTemp not in excludeColors):
-					#~ HEXcolors.append(colorTemp)
-					#~ nb += 1
-				#~ 
-				#~ if (nb == nb_colors):
-					#~ shuffle(HEXcolors) # We change the order of elements in the list because the algorithm is not the best to put different colors close from each others
-					#~ return HEXcolors
+	
 	pdb.set_trace()
 
 def hexColor(integer):

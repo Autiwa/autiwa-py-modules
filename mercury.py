@@ -950,13 +950,14 @@ class Disk(object):
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
 						'sample':"! number of point to the 1D radial grid of the disk", 
-						'is_dissipation':"! a boolean to tell if there is dissipation of the disk in time or not", 
+						'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
+						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
 						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation"}
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             sample=None, is_dissipation=None, inner_boundary_condition=None, outer_boundary_condition=None):
+	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None):
 		"""initialisation of the class"""
 
 		self.parameter = {}
@@ -982,8 +983,11 @@ class Disk(object):
 		if (sample != None):
 			self.parameter['sample'] = sample
 			
-		if (is_dissipation != None):
-			self.parameter['is_dissipation'] = is_dissipation
+		if (dissipation_type != None):
+			self.parameter['dissipation_type'] = dissipation_type
+		
+		if (disk_exponential_decay != None):
+			self.parameter['disk_exponential_decay'] = disk_exponential_decay
 			
 		if (inner_boundary_condition != None):
 			self.parameter['inner_boundary_condition'] = inner_boundary_condition
