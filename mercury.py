@@ -953,11 +953,12 @@ class Disk(object):
 						'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
-						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation"}
+						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
+						'torque_type':"! 'real', 'mass_dependant', 'mass_independant' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ"}
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None):
+	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, torque_type=None):
 		"""initialisation of the class"""
 
 		self.parameter = {}
@@ -994,6 +995,9 @@ class Disk(object):
 		
 		if (outer_boundary_condition != None):
 			self.parameter['outer_boundary_condition'] = outer_boundary_condition
+		
+		if (torque_type != None):
+			self.parameter['torque_type'] = torque_type
 	
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
