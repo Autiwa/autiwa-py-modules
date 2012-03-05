@@ -7,6 +7,7 @@ __version__ = "$Revision: 1.2 $"
 __credits__ = """module to help writing svg files"""
 
 import pdb
+from autiwa import contrastColor
 
 SVG_HEAD = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
@@ -72,97 +73,6 @@ def createSVG(filename,*boxs):
 	
 	svgfile.write(SVG_FOOT)
 	svgfile.close()
-
-def colorList(nb_colors):
-	"""Function that return a list of colors given the number of different colors we want. 
-	It is still a simple version of the function that may contain bugs, especially for large values of colors. 
-	
-	Parameter
-	nb_colors : The number of different colors we want.
-	
-	Return 
-	A list of colors, with the desired number of elements
-	"""
-	from math import ceil
-	
-	individual_colors = int(ceil(nb_colors**0.33))
-
-	colors = [0, 255, 127]
-	iteration = 0
-	# We search for all individual values (for R, G, B) that we need to define at least the number of colors we want.
-	while (len(colors) < individual_colors):
-		step = 255 / (2**(iteration + 1))
-		
-		iteration += 1
-
-		#For the current iteration, the number of subdivision will be a power of 2
-		nb_el = 2**iteration
-
-		# We start at half the step
-		temp = step/2
-		for i in range(nb_el):
-			colors.append(temp)
-			temp += step
-	
-	HEXcolors = []
-	nb = 0
-	for R in colors:
-		for G in colors:
-			for B in colors:
-				colorTemp = hexColor(R)+hexColor(G)+hexColor(B)
-				HEXcolors.append(colorTemp)
-				nb += 1
-				
-				if (nb == nb_colors+1):
-					HEXcolors.remove('000000')
-					return HEXcolors
-
-def hexColor(integer):
-	"""given a number between 0 and 255, return the hexadecimal value as a two character string
-	"""
-	
-	if (type(integer) != int):
-		raise TypeError("The parameter must be an integer")
-	
-	if (integer <0 or integer > 255):
-		raise ValueError("The parameter must be between 0 and 255")
-
-	value = hex(integer)
-	value = value.split("0x")[1]
-
-	if (len(value) < 2):
-		value = "0"+value
-
-	return value
-
-def contrastColor(ref_color):
-	"""
-	Return '000000' by default, but if 'color' is quite dark, then return 'ffffff'
-
-	The principle is simple, we calculate the brightness of the color and regarding a tolerance parameter, 
-	we put white or black in order to have a visible color on the given one.
-
-	Example :
-	contrastColor('ffffff') = '000000'
-	contrastColor('000000') = 'ffffff'
-	"""
-	
-	tolerance = 130
-
-	R = int('0x'+ref_color[0:2],16)
-	G = int('0x'+ref_color[2:4],16)
-	B = int('0x'+ref_color[4:6],16)
-	
-	# We calculate the square of the brightness in order to avoid the use of sqrt.
-	brightness_square = .241 * R**2 + .691 * G**2 + 0.068 * B**2 # source : http://alienryderflex.com/hsp.html
-	
-
-	if (brightness_square > tolerance**2):
-		color = "000000"
-	else:
-		color = "ffffff"
-
-	return color
 	
 class SVGobject(object):
 	"""meta class that contains general behaviours for objects defining 
@@ -402,6 +312,96 @@ class Path(SVGobject):
 		
 		return text
 
+#~ def colorList(nb_colors):
+	#~ """Function that return a list of colors given the number of different colors we want. 
+	#~ It is still a simple version of the function that may contain bugs, especially for large values of colors. 
+	#~ 
+	#~ Parameter
+	#~ nb_colors : The number of different colors we want.
+	#~ 
+	#~ Return 
+	#~ A list of colors, with the desired number of elements
+	#~ """
+	#~ from math import ceil
+	#~ 
+	#~ individual_colors = int(ceil(nb_colors**0.33))
+#~ 
+	#~ colors = [0, 255, 127]
+	#~ iteration = 0
+	#~ # We search for all individual values (for R, G, B) that we need to define at least the number of colors we want.
+	#~ while (len(colors) < individual_colors):
+		#~ step = 255 / (2**(iteration + 1))
+		#~ 
+		#~ iteration += 1
+#~ 
+		#~ #For the current iteration, the number of subdivision will be a power of 2
+		#~ nb_el = 2**iteration
+#~ 
+		#~ # We start at half the step
+		#~ temp = step/2
+		#~ for i in range(nb_el):
+			#~ colors.append(temp)
+			#~ temp += step
+	#~ 
+	#~ HEXcolors = []
+	#~ nb = 0
+	#~ for R in colors:
+		#~ for G in colors:
+			#~ for B in colors:
+				#~ colorTemp = hexColor(R)+hexColor(G)+hexColor(B)
+				#~ HEXcolors.append(colorTemp)
+				#~ nb += 1
+				#~ 
+				#~ if (nb == nb_colors+1):
+					#~ HEXcolors.remove('000000')
+					#~ return HEXcolors
+#~ 
+#~ def hexColor(integer):
+	#~ """given a number between 0 and 255, return the hexadecimal value as a two character string
+	#~ """
+	#~ 
+	#~ if (type(integer) != int):
+		#~ raise TypeError("The parameter must be an integer")
+	#~ 
+	#~ if (integer <0 or integer > 255):
+		#~ raise ValueError("The parameter must be between 0 and 255")
+#~ 
+	#~ value = hex(integer)
+	#~ value = value.split("0x")[1]
+#~ 
+	#~ if (len(value) < 2):
+		#~ value = "0"+value
+#~ 
+	#~ return value
+#~ 
+#~ def contrastColor(ref_color):
+	#~ """
+	#~ Return '000000' by default, but if 'color' is quite dark, then return 'ffffff'
+#~ 
+	#~ The principle is simple, we calculate the brightness of the color and regarding a tolerance parameter, 
+	#~ we put white or black in order to have a visible color on the given one.
+#~ 
+	#~ Example :
+	#~ contrastColor('ffffff') = '000000'
+	#~ contrastColor('000000') = 'ffffff'
+	#~ """
+	#~ 
+	#~ tolerance = 130
+#~ 
+	#~ R = int('0x'+ref_color[0:2],16)
+	#~ G = int('0x'+ref_color[2:4],16)
+	#~ B = int('0x'+ref_color[4:6],16)
+	#~ 
+	#~ # We calculate the square of the brightness in order to avoid the use of sqrt.
+	#~ brightness_square = .241 * R**2 + .691 * G**2 + 0.068 * B**2 # source : http://alienryderflex.com/hsp.html
+	#~ 
+#~ 
+	#~ if (brightness_square > tolerance**2):
+		#~ color = "000000"
+	#~ else:
+		#~ color = "ffffff"
+#~ 
+	#~ return color
 
 if __name__ == '__main__':
 	testbox = TextBox("test",2, 3,color="ff0000")
@@ -416,7 +416,7 @@ if __name__ == '__main__':
 # RMQ : If you use objects in other objects, then there is a chance 
 # you have different objects with the same ID. For exemple, if you 
 # define a path that you print, and use this path in a group that you 
-# print also, then you will have to objects Path with the same Path.id. 
+# print also, then you will have two objects Path with the same Path.id. 
 # But I think the normal behaviour is to define an object an use 
 # it only once, so I don't think it's a bug. 
 

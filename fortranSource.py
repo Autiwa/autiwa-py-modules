@@ -15,6 +15,7 @@ import string
 import subprocess # To launch various process, get outputs et errors, returnCode and so on.
 import pdb # To debug
 from svg import *
+import autiwa
 
 class SubroutineSource(object):
 	"""Define an object linked to a fortran 90 source code that will
@@ -72,7 +73,7 @@ class SubroutineSource(object):
 		"""class function that gives a dictionnary of colors for each sourceFile defined so far
 		"""
 		
-		cls.subroutine_colors = dict(zip(cls.findSubroutine.keys(), colorList(len(cls.findSubroutine))))
+		cls.subroutine_colors = dict(zip(cls.findSubroutine.keys(), autiwa.colorList(len(cls.findSubroutine))))
 		
 		#~ pdb.set_trace()
 		return 0

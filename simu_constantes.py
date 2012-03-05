@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Librairies contenant des constantes utiles
-# Version 0.2
+# Version 0.3
 # pour importer les variables, faire "from simu_constantes import *", 
 # sinon, les variables s'appeleront simu_constantes.nom_variable
 import math
@@ -9,22 +9,22 @@ import math
 ######################
 # Définition des constantes
 ######################
-ms = 1.9891e30# kg masse du soleil
-mj = 1.8986e27# kg masse de jupiter
-mt = 5.9736e24# kg masse de la terre
-msat = 5.6846e26# kg masse de saturne
+MS = 1.9891e30# kg masse du soleil
+MJ = 1.8986e27# kg masse de jupiter
+MT = 5.9736e24# kg masse de la terre
+MSAT = 5.6846e26# kg masse de saturne
 
-dj = 1.326 #g/cm³ densité moyenne d'une planète géante (ici, densité moyenne de jupiter)
-dt = 5.515 #g/cm³ densité moyenne d'une planète de type terrestre (ici, densité moyenne de la terre)
+DJ = 1.326 #g/cm³ densité moyenne d'une planète géante (ici, densité moyenne de jupiter)
+DT = 5.515 #g/cm³ densité moyenne d'une planète de type terrestre (ici, densité moyenne de la terre)
 
 # en mètre valeur d'une unité astronomique
-ua = 1.495979e11
+AU = 1.495979e11
 
 # nombre de jours dans un an, c'est plus simple ensuite pour calculer T
-an = 365.25
+YEAR = 365.25
 
 # nombre de secondes dans une journée
-jour = 86400
+DAY = 86400
 
 # Constante de gravitation universelle en unité SI
 G = 6.6726e-11
@@ -36,8 +36,8 @@ G0 = 2.959122082855911e-4#G * jour**2 * ms / ua**3
 ######################
 # Facteurs de conversion
 ######################
-degtorad = math.pi/180
-radtodeg = 180/math.pi
+DEGTORAD = math.pi/180
+RADTODEG = 180/math.pi
 
 #######################
 # On prépare le stockage des fichiers

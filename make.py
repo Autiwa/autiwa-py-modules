@@ -16,7 +16,7 @@ import subprocess # To launch various process, get outputs et errors, returnCode
 import difflib # To compare two strings
 import pdb # To debug
 from svg import *
-
+import autiwa
 
 def make_binaries(sources_filename, mains, debug=False, gdb=False, profiling=False):
   """function that will compile every needed sourceFile and get a 
@@ -332,10 +332,10 @@ class sourceFile(object):
   def setModColors(cls):
     """class function that gives a dictionnary of colors for each sourceFile defined so far
     """
-    
-    cls.mod_colors = dict(zip(cls.findSource.keys(), colorList(len(cls.findSource))))
-    
-    #~ pdb.set_trace()
+    try:
+      cls.mod_colors = dict(zip(cls.findSource.keys(), autiwa.colorList(len(cls.findSource))))
+    except:
+      pdb.set_trace()
     return 0
   
   @classmethod
