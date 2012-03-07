@@ -141,6 +141,15 @@ class Body(AutiwaObject):
 
 		return texte
 	
+	@classmethod
+	def resetCounter(cls):
+		"""method to reset the counters of bodies. 
+		
+		The class parameters NB_SMALL and NB_BIG will be set to 0"""
+		
+		cls.NB_SMALL = 0  # The number of small bodies. Usefull for the default name of the planets
+		cls.NB_BIG = 0 # The number of big bodies
+	
 class BodyAst(Body):
 	"""Class that define a body with asteroïdal coordinates
 	
