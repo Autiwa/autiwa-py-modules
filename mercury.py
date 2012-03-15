@@ -145,7 +145,9 @@ class Body(AutiwaObject):
 	def resetCounter(cls):
 		"""method to reset the counters of bodies. 
 		
-		The class parameters NB_SMALL and NB_BIG will be set to 0"""
+		The class parameters NB_SMALL and NB_BIG will be set to 0. 
+		
+		WARNING: Problems could occurs if you use the method outside the 'Body' class (in inherited class for instance)"""
 		
 		cls.NB_SMALL = 0  # The number of small bodies. Usefull for the default name of the planets
 		cls.NB_BIG = 0 # The number of big bodies
@@ -950,7 +952,7 @@ class Disk(object):
 					"! the identificator and the value(s) (each value must be separated with at least one space. \n" + \
 					"! Line must not be longer than 80 character, but comments can be far bigger than that, even on line with a parameter to read.\n\n"
 	
-	COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
+	DISK_COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
 						'adiabatic_index':"! the adiabatic index for the gas equation of state", 
 						'mean_molecular_weight':"! the mean molecular weight in mass of a proton", 
 						'surface_density':"! Here we define the power law for surface density sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
@@ -958,55 +960,86 @@ class Disk(object):
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
-						'sample':"! number of point to the 1D radial grid of the disk", 
-						'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
+						'sample':"! number of point to the 1D radial grid of the disk"}
+	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
 						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
-						'torque_type':"! 'real', 'mass_dependant', 'mass_independant' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ"}
+						'torque_type':"! 'real', 'mass_dependant', 'mass_independant' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ",
+						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
+						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
+						'mass_dep_m_min':"! lower mass for the 'mass_dependant' convergence zone", 
+						'mass_dep_m_max':"! top mass for the 'mass_dependant' convergence zone", 
+						'mass_dep_cz_m_min':"! position of the convergence zone for the lower mass ('mass_dependant' case)", 
+						'mass_dep_cz_m_max':"! position of the convergence zone for the top mass ('mass_dependant' case)"}
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, torque_type=None):
+	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
+	             torque_type=None, torque_profile_steepness=None, indep_cz=None, 
+	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
 		"""initialisation of the class"""
 
-		self.parameter = {}
+		self.disk_parameter = {}
+		self.interaction_parameter = {}
 		
 		if (b_over_h != None):
-			self.parameter['b/h'] = b_over_h
+			self.disk_parameter['b/h'] = b_over_h
 		
 		if (adiabatic_index != None):
-			self.parameter['adiabatic_index'] = adiabatic_index
+			self.disk_parameter['adiabatic_index'] = adiabatic_index
 		
 		if (mean_molecular_weight != None):
-			self.parameter['mean_molecular_weight'] = mean_molecular_weight
+			self.disk_parameter['mean_molecular_weight'] = mean_molecular_weight
 		
 		if (surface_density != None):
-			self.parameter['surface_density'] = surface_density
+			self.disk_parameter['surface_density'] = surface_density
 		
 		if (disk_edges != None):
-			self.parameter['disk_edges'] = disk_edges
+			self.disk_parameter['disk_edges'] = disk_edges
 		
 		if (viscosity != None):
-			self.parameter['viscosity'] = viscosity
+			self.disk_parameter['viscosity'] = viscosity
 			
 		if (sample != None):
-			self.parameter['sample'] = sample
+			self.disk_parameter['sample'] = sample
 			
 		if (dissipation_type != None):
-			self.parameter['dissipation_type'] = dissipation_type
+			self.interaction_parameter['dissipation_type'] = dissipation_type
 		
 		if (disk_exponential_decay != None):
-			self.parameter['disk_exponential_decay'] = disk_exponential_decay
+			self.interaction_parameter['disk_exponential_decay'] = disk_exponential_decay
 			
 		if (inner_boundary_condition != None):
-			self.parameter['inner_boundary_condition'] = inner_boundary_condition
+			self.interaction_parameter['inner_boundary_condition'] = inner_boundary_condition
 		
 		if (outer_boundary_condition != None):
-			self.parameter['outer_boundary_condition'] = outer_boundary_condition
+			self.interaction_parameter['outer_boundary_condition'] = outer_boundary_condition
 		
 		if (torque_type != None):
-			self.parameter['torque_type'] = torque_type
+			self.interaction_parameter['torque_type'] = torque_type
+			
+		if (torque_profile_steepness != None):
+			self.interaction_parameter['torque_profile_steepness'] = torque_profile_steepness
+		
+		if (torque_type == 'mass_independant'):
+			if (indep_cz != None):
+				self.interaction_parameter['indep_cz' ] = indep_cz 
+		
+		if (torque_type == 'mass_dependant'):
+			if (mass_dep_m_min != None):
+				self.interaction_parameter['mass_dep_m_min' ] = mass_dep_m_min 
+				
+			if (mass_dep_m_max != None):
+				self.interaction_parameter['mass_dep_m_max' ] = mass_dep_m_max 
+				
+			if (mass_dep_cz_m_min != None):
+				self.interaction_parameter['mass_dep_cz_m_min' ] = mass_dep_cz_m_min 
+				
+			if (mass_dep_cz_m_max != None):
+				self.interaction_parameter['mass_dep_cz_m_max' ] = mass_dep_cz_m_max 
+		
+		
 	
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
@@ -1016,9 +1049,23 @@ class Disk(object):
 		## On écrit l'entête
 		disk.write(Disk.DISK_START)
 		
-		for (key, value) in self.parameter.items():
+		disk.write("*****************************\n")
+		disk.write("*      Disk Parameters      *\n")
+		disk.write("*****************************\n")
+		for (key, value) in sorted(self.disk_parameter.items()):
 			disk.write("\n")
-			disk.write(Disk.COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
+			disk.write(Disk.DISK_COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
+			if (type(value) in (list, tuple)):
+				disk.write(key+" = "+" ".join(map(str, value))+"\n")
+			else:
+				disk.write(key+" = "+str(value)+"\n")
+		
+		disk.write("*****************************\n")
+		disk.write("* Interactions disk/planets *\n")
+		disk.write("*****************************\n")
+		for (key, value) in sorted(self.interaction_parameter.items()):
+			disk.write("\n")
+			disk.write(Disk.INTERACTIONS_COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
 			if (type(value) in (list, tuple)):
 				disk.write(key+" = "+" ".join(map(str, value))+"\n")
 			else:
