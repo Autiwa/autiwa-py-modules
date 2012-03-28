@@ -965,7 +965,7 @@ class Disk(object):
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
 						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
-						'torque_type':"! 'real', 'mass_dependant', 'mass_independant' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ",
+						'torque_type':"! 'real', 'mass_dependant', 'mass_independant', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
 						'mass_dep_m_min':"! lower mass for the 'mass_dependant' convergence zone", 
