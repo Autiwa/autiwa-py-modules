@@ -239,6 +239,11 @@ class Job_PBS(object):
 		script.write("\n")
 		script.write("#############################\n")
 		script.write("\n")
+		if (self.isPrologEpilog):
+			script.write("# With prologue and epilogue, we must now change the working derectory before running the simulation\n")
+			script.write("myTmpRep=/tmp/$USER/job_$PBS_JOBID\n")
+			script.write("cd $myTmpRep\n")
+			script.write("echo \"pwd:\" `pwd`\n")
 		script.write("# The job of the script is launched here\n")
 		script.write(self.command)
 		script.write("\n")
