@@ -16,6 +16,7 @@ from math import *
 import autiwa
 import pdb
 import subprocess
+import os # at least to have access to the os.path.isfile() method.
 
 def setExecutionRight(doc_name):
 	"""function that set the right for the file to be executed. This file must be in the current working directory
@@ -142,6 +143,12 @@ class Job_PBS(object):
 	
 	For the moment, the class only allows us to define non parallel jobs that need only 1 proc.
 	
+	For jobs that only needs one proc, we define prologue and epilogue to transfert to the node all 
+	the needed files and taking them back at the end of the job. This is done to prevent surcharge 
+	of the hard disk. This is supposed to be completely transparent to the user on the express 
+	condition that all the needed files for the simulation are in the 
+	current working directory or with absolute paths.
+	
 	Parameters:
 	command : the name of the command (or script) to run
 	directory="." : the name of the directory where the job will be launched. By default, it will be the current working directory.
@@ -163,6 +170,11 @@ class Job_PBS(object):
 		
 		self.proc_per_node = 1
 		self.nodes = 1
+		
+		if (self.nodes == 1):
+			self.isPrologEpilog = True
+		else:
+			self.isPrologEpilog = False
 		
 		if (type(walltime) == str):
 			self.walltime = walltime
@@ -194,6 +206,13 @@ class Job_PBS(object):
 		script.write("# Specify the working directory\n")
 		script.write("#PBS -d "+str(self.directory)+"\n")
 		script.write("\n")
+		# When all the calculations are done in one peculiar node, we create prolog and epilog to limit the use of the /home harddrive.
+		if (self.isPrologEpilog):
+			script.write("# prologue\n")
+			script.write("#PBS -l prologue=./prolog.sh\n")
+			script.write("\n")
+			script.write("# epilogue\n")
+			script.write("#PBS -l epilogue=./epilog.sh\n")
 		script.write("# walltime (hh:mm::ss)\n")
 		script.write("#PBS -l walltime="+self.walltime+"\n")
 		script.write("\n")
@@ -226,6 +245,178 @@ class Job_PBS(object):
 		script.write("# all done\n")
 		script.write("echo `date` \"Job finished\" \n")
 		script.close()
+		
+		if (self.isPrologEpilog):
+			prolog = prolog_PBS()
+			prolog.write()
+			
+			epilog = epilog_PBS()
+			epilog.write()
+
+class prolog_PBS(object):
+	"""
+	This define an object and then a file 'prolog.sh' that will contains various commands for a
+	prolog file in the PBS environment (like avakas).
+	
+	By default, this file will create a temporary directory on the targeted node, 
+	and transfert all the files from the current directory to this tmp directory.
+	
+	(The same will then have to be done in the opposite way in an epilog script).
+	
+	Parameters :
+	files="*" : By default, we copy all the files in the current working directory, but with this option, 
+	            we can specify to copy only peculiar files. All the specified files MUST NOT have 'spaces' in their names.
+	
+	Examples : 
+	prolog_PBS(files="*.in")
+	or
+	prolog_PBS(files="param.in big.in")
+	"""
+	
+	def __init__(self, files="*"):
+		"""initialisation of the class"""
+		
+		self.files = files
+		
+		self.name = "prolog.sh"
+	
+	def __giveRights(self):
+		"""method to run after creating the file (after the 'write' method then) because to run the job, 
+		the prolog and epilog must have some execution rights"""
+		
+		if os.path.isfile(self.name):
+			setExecutionRight(self.name)
+		else:
+			raise NameError("the file '"+self.name+"' doesn't exist.")
+		
+	def write(self):
+		"""write all the data in a file named self.name in the current working directory"""
+		
+		script = open(self.name, 'w')
+		script.write("#!/bin/sh\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"-- begin prologue\"\n")
+		script.write("\n")
+		script.write("# prologue gets arguments:\n")
+		script.write("# argv[1] 	job id\n")
+		script.write("# argv[2] 	job execution user name\n")
+		script.write("# argv[3] 	job execution group name\n")
+		script.write("# argv[4] 	job name (TORQUE 1.2.0p4 and higher only)\n")
+		script.write("# argv[5] 	list of requested resource limits (TORQUE 1.2.0p4 and higher only)\n")
+		script.write("# argv[6] 	job execution queue (TORQUE 1.2.0p4 and higher only)\n")
+		script.write("# argv[7] 	job account (TORQUE 1.2.0p4 and higher only)jobid=$1\n")
+		script.write("jobid=$1\n")
+		script.write("user=$2\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"User:\" $USER\n")
+		script.write("echo \"Host:\" `hostname`\n")
+		script.write("echo \"Directory:\" `pwd`\n")
+		script.write("echo \"PBS_O_WORKDIR:\" $PBS_O_WORKDIR\n")
+		script.write("\n")
+		script.write("echo \"jobid:\" $jobid\n")
+		script.write("echo \"user:\" $user\n")
+		script.write("\n")
+		script.write("# \n")
+		script.write("myTmpRep=/tmp/$user/job_$jobid\n")
+		script.write("mkdir -p $myTmpRep\n")
+		for file in self.files.split():
+			script.write("cp $PBS_O_WORKDIR/"+file+" $myTmpRep/.\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"-- end prologue\"\n")
+		script.write("\n")
+		script.write("# Successful completion => Job will run\n")
+		script.write("exit 0\n")
+		script.close()
+		
+		# We need to give certain rights to the prologue script.
+		self.__giveRights()
+		
+class epilog_PBS(object):
+	"""
+	This define an object and then a file 'epilog.sh' that will contains various commands for an
+	epilog file in the PBS environment (like avakas).
+	
+	By default, this file will copy back all the selected files form a tmp directory on the 
+	node back to the working directory when we submitted the job
+	
+	(The same must have been done in the opposite way at the beginning of the job, in a prologue script).
+	
+	Parameters :
+	files="*" : By default, we copy all the files in the current working directory, but with this option, 
+	            we can specify to copy only peculiar files. All the specified files MUST NOT have 'spaces' in their names.
+	
+	Examples : 
+	epilog_PBS(files="*.out")
+	or
+	epilog_PBS(files="param.out big.out")
+	"""
+	
+	def __init__(self, files="*"):
+		"""initialisation of the class"""
+		
+		self.files = files
+		
+		self.name = "epilog.sh"
+	
+	def __giveRights(self):
+		"""method to run after creating the file (after the 'write' method then) because to run the job, 
+		the prolog and epilog must have some execution rights"""
+		
+		if os.path.isfile(self.name):
+			setExecutionRight(self.name)
+		else:
+			raise NameError("the file '"+self.name+"' doesn't exist.")
+		
+	def write(self):
+		"""write all the data in a file named self.name in the current working directory"""
+		
+		script = open(self.name, 'w')
+		script.write("#!/bin/sh\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"-- begin epilogue\"\n")
+		script.write("\n")
+		script.write("# epilogue gets arguments:\n")
+		script.write("# argv[1] 	job id\n")
+		script.write("# argv[2] 	job execution user name\n")
+		script.write("# argv[3] 	job execution group name\n")
+		script.write("# argv[4] 	job name\n")
+		script.write("# argv[5] 	session id\n")
+		script.write("# argv[6] 	list of requested resource limits\n")
+		script.write("# argv[7] 	list of resources used by job\n")
+		script.write("# argv[8] 	job execution queue\n")
+		script.write("# argv[9] 	job account\n")
+		script.write("# argv[10] 	job exit code\n")
+		script.write("jobid=$1\n")
+		script.write("user=$2\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"User:\" $USER\n")
+		script.write("echo \"Host:\" `hostname`\n")
+		script.write("echo \"Directory:\" `pwd`\n")
+		script.write("echo \"PBS_O_WORKDIR:\" $PBS_O_WORKDIR\n")
+		script.write("\n")
+		script.write("echo \"jobid:\" $jobid\n")
+		script.write("echo \"user:\" $user\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("myTmpRep=/tmp/$user/job_$jobid\n")
+		for file in self.files.split():
+			script.write("cp $myTmpRep/"+file+" $PBS_O_WORKDIR/\n")
+		script.write("\n")
+		script.write("#\n")
+		script.write("echo \"-- end epilogue\"\n")
+		script.write("\n")
+		script.write("# Successful completion\n")
+		script.write("exit 0\n")
+		script.close()
+		
+		# We need to give certain rights to the epilogue script
+		self.__giveRights()
+
 
 class SimpleJob(object):
 	"""Class that allow us to define a script for simple jobs that only need a command line as argument
