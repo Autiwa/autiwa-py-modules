@@ -482,10 +482,13 @@ def setParameter(parameter, nb_planets):
 	if (type(parameter) in (int, float)):
 		output_parameters = [significativeRound(parameter,SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)]
 		return output_parameters
-	elif (type(parameter) in [tuple, list] and parameter[2] == 'uniform'):
+	elif (type(parameter) == list):
+		# We assume in this case that we specified explicitely the values for all the planet and do not change anything.
+		return parameter
+	elif (type(parameter) == tuple and parameter[2] == 'uniform'):
 		output_parameters = [significativeRound(uniform(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)]
 		return output_parameters
-	elif (type(parameter) in [tuple, list] and parameter[2] == 'gaussian'):
+	elif (type(parameter) == tuple and parameter[2] == 'gaussian'):
 		output_parameters = [significativeRound(gauss(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)]
 		return output_parameters
 	else:

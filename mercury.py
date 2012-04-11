@@ -4,8 +4,8 @@
 objets ne définissent pas de manière plus simple de définir une simulation. C'est simplement un module qui donne la possibilité 
 de définir et d'écrire les fichiers de paramètres dans un script python."""
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2011-11-29"
-__version__ = "2.1.5"
+__date__ = "2012-04-11"
+__version__ = "2.2.0"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 from simulations_utilities import number_fill
@@ -73,6 +73,7 @@ class Body(AutiwaObject):
 			self.ep = ep
 			self.isEPOCH = True
 		else:
+			self.ep = None
 			self.isEPOCH = False
 		
 		# By default, we give a name based on the index of the planet (assuming all the instances will be on the planetary system. 
@@ -141,6 +142,39 @@ class Body(AutiwaObject):
 
 		return texte
 	
+	def get_info(self, line):
+		"""method that get info from a line formatted by a mercury file (either "small.in" or "big.in"). 
+		A lot of arguments will be optional and set to None if nothing is given in the line.
+		"""
+		line = line.rstrip("\n")
+		elements = line.split()
+		self.name = elements[0]
+		
+		correspondance = {"m":self.m , "r":self.r , "d":self.d , "a1":self.a1 , "a2":self.a2 , "a3":self.a3 , "ep":self.ep}
+		
+		for element in elements[1:]:
+			(key, value) = element.split("=")
+			if (key == 'm'):
+				self.m = float(value)
+			elif (key == 'r'):
+				self.r = float(value)
+			elif (key == 'd'):
+				self.d = float(value)
+			elif (key == 'a1'):
+				self.a1 = float(value)
+			elif (key == 'a2'):
+				self.a2 = float(value)
+			elif (key == 'a3'):
+				self.a3 = float(value)
+			elif (key == 'ep'):
+				self.ep = float(value)
+		
+		if (self.ep != None):
+			self.isEPOCH = True
+		else:
+			self.isEPOCH = False
+		
+	
 	@classmethod
 	def resetCounter(cls):
 		"""method to reset the counters of bodies. 
@@ -201,6 +235,19 @@ class BodyAst(Body):
 		texte += str(self.a) +" " + str(self.e) + " " + str(self.I) +" " + str(self.g) +" " + str(self.n) +" " + str(self.M)+" " + str(self.sx)+" " + str(self.sy)+" " + str(self.sz)+"\n"
 		
 		return texte
+	
+	def get_info(self, lines):
+		"""method that get info from a line formatted by a mercury file (either "small.in" or "big.in"). 
+		A lot of arguments will be optional and set to None if nothing is given in the line.
+		"""
+		Body.get_info(self, lines[0])
+		
+		line = lines[1].rstrip("\n")
+		elements = line.split()
+		
+		(self.a, self.e, self.I, self.g, self.n, self.M, self.sx, self.sy, self.sz) = map(float, elements)
+		
+	
 		
 class BodyCom(Body):
 	"""Class that define a body with cometary coordinates
@@ -251,6 +298,18 @@ class BodyCom(Body):
 		texte += str(self.q) +" " + str(self.e) + " " + str(self.I) +" " + str(self.g) +" " + str(self.n) +" " + str(self.T)+" " + str(self.sx)+" " + str(self.sy)+" " + str(self.sz)+"\n"
 		
 		return texte
+	
+	def get_info(self, lines):
+		"""method that get info from a line formatted by a mercury file (either "small.in" or "big.in"). 
+		A lot of arguments will be optional and set to None if nothing is given in the line.
+		"""
+		Body.get_info(self, lines[0])
+		
+		line = lines[1].rstrip("\n")
+		elements = line.split()
+		
+		(self.q, self.e, self.I, self.g, self.n, self.T, self.sx, self.sy, self.sz) = map(float, elements)
+
 
 class BodyCart(Body):
 	"""Class that define a body with cartesian coordinates
@@ -300,6 +359,17 @@ class BodyCart(Body):
 		texte += str(self.sx) +" " + str(self.sy)+" " + str(self.sz)+"\n"
 		
 		return texte
+	
+	def get_info(self, lines):
+		"""method that get info from a line formatted by a mercury file (either "small.in" or "big.in"). 
+		A lot of arguments will be optional and set to None if nothing is given in the line.
+		"""
+		Body.get_info(self, lines[0])
+		
+		line = lines[1].rstrip("\n")
+		elements = line.split()
+		
+		(self.x, self.y, self.z, self.vx, self.vy, self.vz, self.sx, self.sy, self.sz) = map(float, elements)
 
 class PlanetarySystem(AutiwaObject):
 	"""
@@ -339,7 +409,11 @@ class PlanetarySystem(AutiwaObject):
 		# Big and small bodies must have respectively only one type 
 		# of parameters (in Cartesian, Cometary and Asteroidal), so 
 		# we take the style of the first element, it will be tested further out.
-		self.BigStyle = self.big[0].style
+		try:
+			self.BigStyle = self.big[0].style
+		except:
+			self.BigStyle = "Asteroidal" # If there is no small bodies, we define a default value for an empty big.in file.
+		
 		try:
 			self.SmallStyle = self.small[0].style
 		except:
@@ -439,7 +513,9 @@ class PlanetarySystem(AutiwaObject):
 				Warning("The type of "+str(body)+" is incorrect")
 
 class Big(object):
-	"""class that define an object equivalent to big.in, a parameter file of a mercury simulation
+	"""class that define an object equivalent to big.in, a parameter file of a mercury simulation. 
+	If nothing is given, an empty object and planetary system is created.
+	
 	Parameters:
 	system : an object of type 'PlanetarySystem'
 	"""
@@ -449,11 +525,16 @@ class Big(object):
 				")---------------------------------------------------------------------\n"
 	BIG_INT = ")---------------------------------------------------------------------\n"
 	
-	def __init__(self, system):
-		if (type(system) != PlanetarySystem):
+	def __init__(self, system=None):
+		
+		if (type(system) == PlanetarySystem):
+			self.system = system
+		elif (system == None):
+			self.system = PlanetarySystem()
+		else:
 			raise TypeError("'system must be a 'PlanetarySystem' object")
 			
-		self.system = system
+		
 		
 	def write(self):
 		"""write all the data in a file named 'big.in' in the current working directory"""
@@ -477,6 +558,89 @@ class Big(object):
 
 		bigin.close()
 		
+	def __str__(self):
+		"""to overwrite the str() method"""
+		
+		string = Big.BIG_START
+		string += " style (Cartesian, Asteroidal, Cometary) = "+str(self.system.BigStyle)+"\n"
+		string += " epoch (in days) = "+str(self.system.epoch)+"\n"
+		string += Big.BIG_INT
+		for body in self.system.big:
+			string += body.format()
+			
+		return string
+		
+	def read(self):
+		"""method to read properties from a 'big.in' file in the current working directory
+		
+		/!\ We cannot set the mass of the star in the planetary system with this method. 
+		Since the mass of the star is not used by 'big.in', it is not really important, 
+		but it could be if the mass was used somewhere else from the object embedded in the Big object.
+		"""
+		
+		bigin = open('big.in','r')
+		
+		lines = []
+		for line in bigin:
+			if (line[0] != ")"):
+				lines.append(line)
+		bigin.close()
+		
+		(key, value) = lines[0].split("=")
+		if (key.count("style") > 0):
+			BigStyle = value.split()[0]
+		else:
+			raise TypeError("'style' parameter expected at this line")
+			
+		(key, value) = lines[1].split("=")
+		if (key.count("epoch") > 0):
+			epoch = float(value.split()[0])
+		else:
+			raise TypeError("'epoch' parameter expected at this line")
+		
+		# We delete the two first lines
+		del(lines[0:2])
+		
+		if (BigStyle == 'Asteroidal'):
+			body_type = BodyAst
+		elif (BigStyle == 'Cometary'):
+			body_type = BodyCom
+		elif (BigStyle == 'Cartesian'):
+			body_type = BodyCart
+		else:
+			raise ValueError("the style of coordinate do not match with anything : "+BigStyle)
+		
+		# We merge the lines by two because all the informations of one planet are contained in two consecutive lines
+		bodies = []
+		i = 0
+		while (i < len(lines)):
+			line1 = lines[i]
+			
+			i += 1
+			# We append lines while the total number of elements is not 9
+			nb_el = 0
+			els = []
+			while (nb_el < 9):
+				els.extend(lines[i].split())
+				nb_el = len(els)
+				i += 1
+			line2 = " ".join(els)
+			
+			#~ pdb.set_trace()
+			body = body_type("big", 0, 0, 0, 0, 0, 0)
+			body.get_info([line1, line2])
+			bodies.append(body)
+		
+		self.system = PlanetarySystem(bodies=bodies, epoch=epoch)
+
+def readBig():
+	"""function that return an object "Big" by reading a 'big.in' file in the current working directory
+	"""
+	
+	bigin = Big()
+	bigin.read()
+	return bigin
+
 class Small(object):
 	"""class that define an object equivalent to small.in, a parameter file of a mercury simulation
 	Parameters:
@@ -1390,8 +1554,11 @@ if __name__=='__main__':
 	messagein = Message()
 	messagein.write()
 	
-	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(500, 0.5), temperature=(510, 1), 
-	          viscosity=1e15, nb_sample=200, is_dissipation=False, inner_boundary_condition='open', outer_boundary_condition='open')
+	bigin2 = readBig()
+	bigin2.write()
+	
+	diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(500, 0.5), 
+	          viscosity=1e15, sample=200, dissipation_type=0, inner_boundary_condition='open', outer_boundary_condition='open')
 	diskin.write()
 	
 	pdb.set_trace()
@@ -1403,4 +1570,5 @@ if __name__=='__main__':
 #TODO
 # Tester si les smalls ont la même époque. Si ce n'est pas le cas, alors aucun ne doit avoir de masse. 
 
+# Diskin() : In earlier versions, there were a "temperature=(500,1)", a "dissipation=False" (replaced by dissipation_type=0") and a "nb_sample=200" (replaced by sample=200) options
 
