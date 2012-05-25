@@ -32,7 +32,7 @@ def setExecutionRight(doc_name):
 	command = "chmod u+x "+doc_name
 
 	process = subprocess.Popen(command, shell=True)
-	returncode = process.poll()
+	returncode = job.wait()
 
 	return returncode
 
