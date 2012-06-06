@@ -1024,7 +1024,7 @@ class Param(object):
 		param.write(Param.PARAM_START)
 		param.write(" algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = "+self.algorithme+"\n")
 		param.write(" start time (days) = "+str(self.start_time)+"\n")
-		param.write(" stop time (days) = "+str(self.stop_time)+"\n")
+		param.write(" stop time (days) = %e\n" % self.stop_time)
 		param.write(" output interval (days) = "+str(self.output_interval)+"\n")
 		param.write(" timestep (days) = "+str(self.h)+"\n")
 		param.write(" accuracy parameter = "+str(self.accuracy)+"\n")
@@ -1124,6 +1124,7 @@ class Disk(object):
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
+						'turbulent_forcing':"! the turbulent forcing parameter, which controls the amplitude of the stochastic density perturbations.", 
 						'sample':"! number of point to the 1D radial grid of the disk"}
 	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
@@ -1139,6 +1140,7 @@ class Disk(object):
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
+	             turbulent_forcing=None, 
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
 	             torque_type=None, torque_profile_steepness=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1164,6 +1166,9 @@ class Disk(object):
 		
 		if (viscosity != None):
 			self.disk_parameter['viscosity'] = viscosity
+		
+		if (turbulent_forcing != None):
+			self.disk_parameter['turbulent_forcing'] = turbulent_forcing
 			
 		if (sample != None):
 			self.disk_parameter['sample'] = sample
