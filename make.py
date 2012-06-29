@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "14 novembre 2011"
-__version__ = "$Revision: 1.7.2 $"
+__date__ = "18 juin 2012"
+__version__ = "$Revision: 1.7.3 $"
 __credits__ = """Based on the work of Pierre gay, in particuliar his get_module function."""
 
 """The aim of this module is to provide a simple way to compile complex fortran programs with various dependencies. 
@@ -40,24 +40,26 @@ def make_binaries(sources_filename, mains, debug=False, gdb=False, profiling=Fal
   
   """
   
+  # if the mains are defined as a list, that means the default name will be the default one, controlled by the class. 
+  if (type(mains) == list):
+    main_list = list(mains)
+    mains = {}
+    for main in main_list:
+      mains[main] = 'default'
+  elif (type(mains) == dict):
+    main_list = mains.keys()
+  else:
+    raise TypeError("'mains' must be a dict or a list")
+  
   # We define the objects for each source file.
   sources = []
+  main_source = []
   for filename in sources_filename:
-    source = sourceFile(filename)
+    if (filename in main_list):
+      source = sourceFile(filename, name=mains[filename], isProgram=True)
+    else:
+      source = sourceFile(filename)
     sources.append(source)
-  
-  # If source filename and name of the binary is the same (except the extension) we can define only the list of names, but else 
-  # we can set a dictionnary to define the correspondance between the source filename (as keys() ) and the name of the binary (as values() )
-  if (type(mains) == dict):
-    main_list = mains.keys()
-    for source in sources:
-      source.name = mains[source.filename]
-  elif (type(mains) == list):
-    main_list = mains
-    
-  # For the source files which are programs, we set the flag.
-  for main in main_list:
-    sourceFile.findSource[main].setProgram(True)
   
   sourceFile.setDebug(debug)
   sourceFile.setGDB(gdb)

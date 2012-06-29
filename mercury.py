@@ -4,8 +4,8 @@
 objets ne définissent pas de manière plus simple de définir une simulation. C'est simplement un module qui donne la possibilité 
 de définir et d'écrire les fichiers de paramètres dans un script python."""
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2012-04-11"
-__version__ = "2.2.0"
+__date__ = "2012-06-29"
+__version__ = "2.2.1"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 from simulations_utilities import number_fill
@@ -1130,8 +1130,9 @@ class Disk(object):
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
 						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
-						'torque_type':"! 'real', 'mass_dependant', 'mass_independant', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
+						'torque_type':"! 'real', 'mass_dependant', 'linear_indep', 'arctan_indep', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
+						'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
 						'mass_dep_m_min':"! lower mass for the 'mass_dependant' convergence zone", 
 						'mass_dep_m_max':"! top mass for the 'mass_dependant' convergence zone", 
@@ -1142,7 +1143,7 @@ class Disk(object):
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
 	             turbulent_forcing=None, 
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
-	             torque_type=None, torque_profile_steepness=None, indep_cz=None, 
+	             torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
 		"""initialisation of the class"""
 
@@ -1190,6 +1191,9 @@ class Disk(object):
 			
 		if (torque_profile_steepness != None):
 			self.interaction_parameter['torque_profile_steepness'] = torque_profile_steepness
+		
+		if (saturation_torque != None):
+			self.interaction_parameter['saturation_torque'] = saturation_torque
 		
 		if (torque_type == 'mass_independant'):
 			if (indep_cz != None):
