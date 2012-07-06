@@ -1124,7 +1124,7 @@ class Disk(object):
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
-						'turbulent_forcing':"! the turbulent forcing parameter, which controls the amplitude of the stochastic density perturbations.", 
+						'is_turbulence':"! 0 if there is no turbulence, 1 if there is turbulence", 
 						'sample':"! number of point to the 1D radial grid of the disk"}
 	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
