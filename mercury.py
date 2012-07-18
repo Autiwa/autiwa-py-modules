@@ -1124,13 +1124,13 @@ class Disk(object):
 																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
-						'is_turbulence':"! 0 if there is no turbulence, 1 if there is turbulence", 
+						'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
 						'sample':"! number of point to the 1D radial grid of the disk"}
 	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
 						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
-						'torque_type':"! 'real', 'mass_dependant', 'linear_indep', 'arctan_indep', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
+						'torque_type':"! 'real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
 						'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
@@ -1141,7 +1141,7 @@ class Disk(object):
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             turbulent_forcing=None, 
+	             is_turbulence=None, 
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
 	             torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1168,8 +1168,8 @@ class Disk(object):
 		if (viscosity != None):
 			self.disk_parameter['viscosity'] = viscosity
 		
-		if (turbulent_forcing != None):
-			self.disk_parameter['turbulent_forcing'] = turbulent_forcing
+		if (is_turbulence != None):
+			self.disk_parameter['is_turbulence'] = int(is_turbulence)
 			
 		if (sample != None):
 			self.disk_parameter['sample'] = sample
@@ -1195,22 +1195,20 @@ class Disk(object):
 		if (saturation_torque != None):
 			self.interaction_parameter['saturation_torque'] = saturation_torque
 		
-		if (torque_type == 'mass_independant'):
-			if (indep_cz != None):
-				self.interaction_parameter['indep_cz' ] = indep_cz 
+		if (indep_cz != None):
+			self.interaction_parameter['indep_cz' ] = indep_cz 
 		
-		if (torque_type == 'mass_dependant'):
-			if (mass_dep_m_min != None):
-				self.interaction_parameter['mass_dep_m_min' ] = mass_dep_m_min 
-				
-			if (mass_dep_m_max != None):
-				self.interaction_parameter['mass_dep_m_max' ] = mass_dep_m_max 
-				
-			if (mass_dep_cz_m_min != None):
-				self.interaction_parameter['mass_dep_cz_m_min' ] = mass_dep_cz_m_min 
-				
-			if (mass_dep_cz_m_max != None):
-				self.interaction_parameter['mass_dep_cz_m_max' ] = mass_dep_cz_m_max 
+		if (mass_dep_m_min != None):
+			self.interaction_parameter['mass_dep_m_min' ] = mass_dep_m_min 
+			
+		if (mass_dep_m_max != None):
+			self.interaction_parameter['mass_dep_m_max' ] = mass_dep_m_max 
+			
+		if (mass_dep_cz_m_min != None):
+			self.interaction_parameter['mass_dep_cz_m_min' ] = mass_dep_cz_m_min 
+			
+		if (mass_dep_cz_m_max != None):
+			self.interaction_parameter['mass_dep_cz_m_max' ] = mass_dep_cz_m_max 
 		
 		
 	

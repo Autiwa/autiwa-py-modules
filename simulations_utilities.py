@@ -99,7 +99,7 @@ def writeRunjobSGE(command, queue, nb_proc=1):
 	script = open(NAME_SCRIPT, 'w')
 	script.write("stdout=$("+qsub+")\n")
 	script.write("echo $stdout\n")
-	script.write("echo `pwd` ':' $stdout>>~/qsub.log\n")
+	script.write("echo `date '+%d-%m-%Y at %H:%M:%S'` `pwd` ':' $stdout>>~/qsub.log\n")
 	script.close()
 
 	setExecutionRight(NAME_SCRIPT)
@@ -132,8 +132,9 @@ def writeRunjobPBS(command):
 	
 	script = open(NAME_SCRIPT, 'w')
 	script.write("stdout=$("+qsub+") # execute the command and store the output in '$stdout'\n")
+	script.write("echo `date '+%d-%m-%Y at %H:%M:%S'` `pwd` ': launched'>>~/qsub.log\n")
 	script.write("echo $stdout # display the output of the qsub\n")
-	script.write("echo `pwd` ':' $stdout>>~/qsub.log\n")
+	script.write("echo `date '+%d-%m-%Y at %H:%M:%S'` `pwd` ':' $stdout>>~/qsub.log\n")
 	script.close()
 
 	setExecutionRight(NAME_SCRIPT)
