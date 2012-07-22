@@ -10,6 +10,7 @@ __version__ = "1.1"
 import mercury
 from random import uniform 
 import simulations_utilities
+import autiwa
 
 def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	""" We will assume a certain number of parameters. For example, all bodies will be big bodies. 
@@ -70,3 +71,14 @@ g=gi, n=ni, M=Mi, ep=epoch))
 	
 	return mercury.PlanetarySystem(bodies=bodies, m_star=m_star, epoch=epoch)
 	
+def get_aei_files():
+	"""function that return the list of *.aei files of the current folder"""
+	(process_stdout, process_stderr, return_code) = autiwa.lancer_commande("ls *.aei")
+	if (return_code != 0):
+		print("the command return an error "+str(return_code))
+		print(process_stderr)
+		exit()
+		
+	liste_aei = process_stdout.split("\n")
+	liste_aei.remove('') # we remove an extra element that doesn't mean anything
+	return liste_aei
