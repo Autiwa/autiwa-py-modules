@@ -4,8 +4,8 @@
 objets ne définissent pas de manière plus simple de définir une simulation. C'est simplement un module qui donne la possibilité 
 de définir et d'écrire les fichiers de paramètres dans un script python."""
 __author__ = "Autiwa <autiwa@gmail.com>"
-__date__ = "2012-06-29"
-__version__ = "2.2.1"
+__date__ = "2012-07-26"
+__version__ = "2.2.2"
 
 from autiwa import AutiwaObject  # We only import what interests us.
 from simulations_utilities import number_fill
@@ -850,6 +850,15 @@ class Param(object):
 	periodic effect = 100 : The number of timesteps between other periodic effects. At present this controls how often mercury6_1.for checks for ejections and recomputes objects' Hill radii.
 	data_dump=None : MUST be set if nb_points is not set
 	output_interval=None : MUST be set if nb_points is not set
+	
+	Remarks : 
+	If you want to do the integration back in time (integration from the future to the past), you just have to invert values of start_time and stop_time. Thus, instead of 
+		start_stime = 0.
+		stop_time = 365.25
+	do
+		start_stime = 365.25
+		stop_time = 0
+	leaving the other parameters unchanged.
 	"""
 	
 	PARAM_START = ")O+_06 Integration parameters  (WARNING: Do not delete this line!!)\n" + \
@@ -1025,7 +1034,7 @@ class Param(object):
 		param.write(" algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = "+self.algorithme+"\n")
 		param.write(" start time (days) = "+str(self.start_time)+"\n")
 		param.write(" stop time (days) = %e\n" % self.stop_time)
-		param.write(" output interval (days) = "+str(self.output_interval)+"\n")
+		param.write(" output interval (days) = %e\n" % self.output_interval)
 		param.write(" timestep (days) = "+str(self.h)+"\n")
 		param.write(" accuracy parameter = "+str(self.accuracy)+"\n")
 		param.write(Param.PARAM_INT)
@@ -1125,6 +1134,7 @@ class Disk(object):
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
 						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
 						'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
+						'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. If not specified, an auto value, based on the value of the viscosity is used.",
 						'sample':"! number of point to the 1D radial grid of the disk"}
 	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
@@ -1141,7 +1151,7 @@ class Disk(object):
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             is_turbulence=None, 
+	             is_turbulence=None, turbulent_forcing=None,
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
 	             torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1170,6 +1180,9 @@ class Disk(object):
 		
 		if (is_turbulence != None):
 			self.disk_parameter['is_turbulence'] = int(is_turbulence)
+			
+		if (turbulent_forcing != None):
+			self.disk_parameter['turbulent_forcing'] = turbulent_forcing
 			
 		if (sample != None):
 			self.disk_parameter['sample'] = sample
