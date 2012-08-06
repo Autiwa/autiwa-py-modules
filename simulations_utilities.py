@@ -49,7 +49,7 @@ def str2str(value):
 	"""function that convert a string into a string. That might be weird to say, 
 	but this function aim to suppress any '"' or "'" in string
 	
-	Return a string without extrenal quotes that might exist
+	Return a string without external quotes that might exist
 	"""
 	
 	# We suppress extremal white spaces

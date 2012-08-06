@@ -1115,7 +1115,10 @@ class Disk(object):
 	temperature=None : a tuple of 2 values. (radius_min, radius_max), in AU, boundary values for the radius sample of the temperature profile. The number of point is given directly in mfo_user
 	viscosity=None : constant viscosity of the disk [cm^2/s]
 	"""
-
+	
+	TORQUE_TYPES = ['real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual']
+	
+	BOUNDARIES = ["open", "closed"]
 	
 	DISK_START = "! ------------------------------------------------\n" + \
 					"! Parameter file for various properties of the disk. \n" + \
@@ -1138,9 +1141,9 @@ class Disk(object):
 						'sample':"! number of point to the 1D radial grid of the disk"}
 	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
 						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
-						'inner_boundary_condition':"! 'open' or 'closed'. Condition at the inner boundary of the gas disk for dissipation", 
-						'outer_boundary_condition':"! 'open' or 'closed'. Condition at the outer boundary of the gas disk for dissipation",
-						'torque_type':"! 'real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual' : define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque",
+						'inner_boundary_condition':"! %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
+						'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
+						'torque_type':"! %s define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque" % TORQUE_TYPES,
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
 						'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
@@ -1194,13 +1197,22 @@ class Disk(object):
 			self.interaction_parameter['disk_exponential_decay'] = disk_exponential_decay
 			
 		if (inner_boundary_condition != None):
-			self.interaction_parameter['inner_boundary_condition'] = inner_boundary_condition
+			if (inner_boundary_condition in Disk.BOUNDARIES):
+				self.interaction_parameter['inner_boundary_condition'] = inner_boundary_condition
+			else:
+				raise NameError("'inner_boundary_condition' does not correspond to an existing type : '%s'\nAvailable conditions : %s" % (inner_boundary_condition, Disk.BOUNDARIES))
 		
 		if (outer_boundary_condition != None):
-			self.interaction_parameter['outer_boundary_condition'] = outer_boundary_condition
+			if (outer_boundary_condition in Disk.BOUNDARIES):
+				self.interaction_parameter['outer_boundary_condition'] = outer_boundary_condition
+			else:
+				raise NameError("'outer_boundary_condition' does not correspond to an existing type : '%s'.\nAvailable conditions : %s" % (outer_boundary_condition, Disk.BOUNDARIES))
 		
 		if (torque_type != None):
-			self.interaction_parameter['torque_type'] = torque_type
+			if (torque_type in Disk.TORQUE_TYPES):
+				self.interaction_parameter['torque_type'] = torque_type
+			else:
+				raise NameError("'torque_type' does not correspond to an existing type : '%s'.\nAvailable torque types : %s" % (torque_type, Disk.TORQUE_TYPES))
 			
 		if (torque_profile_steepness != None):
 			self.interaction_parameter['torque_profile_steepness'] = torque_profile_steepness
