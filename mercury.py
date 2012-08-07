@@ -1131,19 +1131,37 @@ class Disk(object):
 	DISK_COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
 						'adiabatic_index':"! the adiabatic index for the gas equation of state", 
 						'mean_molecular_weight':"! the mean molecular weight in mass of a proton", 
-						'surface_density':"! Here we define the power law for surface density sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
-																"! where sigma_0 is the surface density at (R=1AU) [g/cm^2] and \n" +\
-																"! sigma_index is the negative slope of the surface density power law (alpha in the paper)", 
-						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk (used for temperature profile for instance)", 
-						'viscosity':"! constant viscosity of the disk [cm^2/s]", 
+						'surface_density':"! Here we define the power law for surface density \n" +\
+						                    "!  sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
+																"!  where sigma_0 is the surface density at (R=1AU) [g/cm^2] and sigma_index\n" +\
+																"!  is the negative slope of the surface density power law (alpha in the paper)\n" +\
+																"! If 'manual' is specified, then the surface density profile will instead be\n" +\
+																"!  read from 'surface_density_profile.dat', two columns, the first being \n" +\
+																"!  orbital distance and the second the surface density in g/cm^2", 
+						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
+						             "! (used for temperature profile for instance)", 
+						'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
 						'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
-						'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. If not specified, an auto value, based on the value of the viscosity is used.",
+						'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. \n" +\
+						                    "! If not specified, an auto value, based on the value of the viscosity is used.",
 						'sample':"! number of point to the 1D radial grid of the disk"}
-	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. 0 for no dissipation, 1 for viscous dissipation and 2 for exponential decay of the initial profile", 
-						'disk_exponential_decay':'! value of the exponential decay timescale for the dissipation of the disk (only if dissipation_type is equal to 2)',
+	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. \n" +\
+	                                           "! 0 for no dissipation\n" +\
+	                                           "! 1 for viscous dissipation\n" +\
+	                                           "! 2 for exponential decay of the initial profile", 
+						'disk_exponential_decay':'! Value of the exponential decay timescale for the dissipation of the disk\n' +\
+						                         '! (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
 						'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
-						'torque_type':"! %s define the torque type. By default it's 'real' but you may want to test with particuliar torques for mass (in)dependant CZ. With 'manual', the code will read the file 'torque_profile.dat' that must contain 2 columns, the first being the semi major axis in AU, and the second the torque" % TORQUE_TYPES,
+						'torque_type':"! %s define the torque type.\n" % TORQUE_TYPES +\
+						              "! real : The torque from (pardekooper et al., 2011)\n" +\
+						              "! linear_indep : A mass independant convergence zone with a linear torque profile\n" +\
+						              "! tanh_indep : A mass independant convergence zone with a \n" +\
+						              "!              tanh torque profile that saturate at a given value\n" +\
+						              "! mass_dependant : A mass dependant convergence zone where for a \n" +\
+						              "!                  given mass the torque profile is linear with distance\n" +\
+						              "! manual : the code will read the file 'torque_profile.dat' that must contain 2 columns, \n" +\
+						              "! the first being the semi major axis in AU, and the second the torque",
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
 						'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
