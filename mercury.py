@@ -1124,9 +1124,11 @@ class Disk(object):
 					"! Parameter file for various properties of the disk. \n" + \
 					"! ------------------------------------------------\n" + \
 					"! blanck line or with spaces will be skipped. \n" + \
-					"! In fact, the only lines that matter are non commented lines with a '=' character to distinguish\n" + \
-					"! the identificator and the value(s) (each value must be separated with at least one space. \n" + \
-					"! Line must not be longer than 80 character, but comments can be far bigger than that, even on line with a parameter to read.\n\n"
+					"! In fact, the only lines that matter are non commented lines with a\n" + \
+					"! '=' character to distinguish the identificator and the value(s)\n" + \
+					"! (each value must be separated with at least one space. \n" + \
+					"! Line must not be longer than 80 character, but comments can be far\n" + \
+					"! bigger than that, even on line with a parameter to read.\n\n"
 	
 	DISK_COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
 						'adiabatic_index':"! the adiabatic index for the gas equation of state", 
@@ -1155,13 +1157,13 @@ class Disk(object):
 						'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
 						'torque_type':"! %s define the torque type.\n" % TORQUE_TYPES +\
 						              "! real : The torque from (pardekooper et al., 2011)\n" +\
-						              "! linear_indep : A mass independant convergence zone with a linear torque profile\n" +\
-						              "! tanh_indep : A mass independant convergence zone with a \n" +\
+						              "! linear_indep : Mass independant convergence zone with a linear torque profile\n" +\
+						              "! tanh_indep : Mass independant convergence zone with a \n" +\
 						              "!              tanh torque profile that saturate at a given value\n" +\
-						              "! mass_dependant : A mass dependant convergence zone where for a \n" +\
+						              "! mass_dependant : Mass dependant convergence zone where for a \n" +\
 						              "!                  given mass the torque profile is linear with distance\n" +\
-						              "! manual : the code will read the file 'torque_profile.dat' that must contain 2 columns, \n" +\
-						              "! the first being the semi major axis in AU, and the second the torque",
+						              "! manual : the code will read the file 'torque_profile.dat' that must contain 2\n" +\
+						              "! columns, the first being the semi major axis in AU, and the second the torque",
 						'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
 						'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
 						'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
