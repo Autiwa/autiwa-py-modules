@@ -690,6 +690,26 @@ def contrastColor(ref_color):
 
 	return color
 
+def get_subplot_shape(number_of_plots):
+  """We chose the number of plot in x and y axis for the p.multi
+  environment in order to plot ALL the resonant angles and have x and
+  y numbers as close on from another as possible.
+
+  HOW TO :
+  fig = pl.figure(1)
+	nb_subplot = get_subplot_shape(5)
+	nb_subplot += 1
+  plot_dof = fig.add_subplot(nb_subplot)"""
+  nb_plots_x = 1
+  nb_plots_y = 1
+  while (nb_plots_x * nb_plots_y < number_of_plots):
+    if (nb_plots_x == nb_plots_y):
+      nb_plots_y += 1
+    else:
+      nb_plots_x += 1
+
+  return 100*nb_plots_x + 10 * nb_plots_y
+
 # Si le module est lancé directement, on teste certaines méthodes.
 if __name__=='__main__':
 
