@@ -1142,12 +1142,14 @@ class Disk(object):
 																"!  orbital distance and the second the surface density in g/cm^2", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
 						             "! (used for temperature profile for instance)", 
+						'inner_width_smoothing':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
+						                        "! the inner edge where the surface density is damped so\n" + \
+						                        "! that the surface density at the inner edge will be 0",
 						'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
 						'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
 						'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. \n" +\
 						                    "! If not specified, an auto value, based on the value of the viscosity is used.",
-						'sample':"! number of point to the 1D radial grid of the disk"}
-	INTERACTIONS_COMMENT = {'dissipation_type':"! integer to tell if there is dissipation of the disk or not. \n" +\
+						'dissipation_type':"! integer to tell if there is dissipation of the disk or not. \n" +\
 	                                           "! 0 for no dissipation\n" +\
 	                                           "! 1 for viscous dissipation\n" +\
 	                                           "! 2 for exponential decay of the initial profile", 
@@ -1155,7 +1157,8 @@ class Disk(object):
 						                         '! (only if dissipation_type is equal to 2)',
 						'inner_boundary_condition':"! %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
 						'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
-						'torque_type':"! %s define the torque type.\n" % TORQUE_TYPES +\
+						'sample':"! number of point to the 1D radial grid of the disk"}
+	INTERACTIONS_COMMENT = {'torque_type':"! %s define the torque type.\n" % TORQUE_TYPES +\
 						              "! real : The torque from (pardekooper et al., 2011)\n" +\
 						              "! linear_indep : Mass independant convergence zone with a linear torque profile\n" +\
 						              "! tanh_indep : Mass independant convergence zone with a \n" +\
@@ -1174,7 +1177,7 @@ class Disk(object):
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             is_turbulence=None, turbulent_forcing=None,
+	             is_turbulence=None, turbulent_forcing=None, inner_width_smoothing=None,
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
 	             torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1198,6 +1201,9 @@ class Disk(object):
 		if (disk_edges != None):
 			self.disk_parameter['disk_edges'] = disk_edges
 		
+		if (inner_width_smoothing != None):
+			self.disk_parameter['inner_width_smoothing'] = inner_width_smoothing
+		
 		if (viscosity != None):
 			self.disk_parameter['viscosity'] = viscosity
 		
@@ -1206,28 +1212,32 @@ class Disk(object):
 			
 		if (turbulent_forcing != None):
 			self.disk_parameter['turbulent_forcing'] = turbulent_forcing
-			
+		
 		if (sample != None):
 			self.disk_parameter['sample'] = sample
-			
+		
 		if (dissipation_type != None):
-			self.interaction_parameter['dissipation_type'] = dissipation_type
+			self.disk_parameter['dissipation_type'] = dissipation_type
 		
 		if (disk_exponential_decay != None):
-			self.interaction_parameter['disk_exponential_decay'] = disk_exponential_decay
-			
+			self.disk_parameter['disk_exponential_decay'] = disk_exponential_decay
+		
 		if (inner_boundary_condition != None):
 			if (inner_boundary_condition in Disk.BOUNDARIES):
-				self.interaction_parameter['inner_boundary_condition'] = inner_boundary_condition
+				self.disk_parameter['inner_boundary_condition'] = inner_boundary_condition
 			else:
 				raise NameError("'inner_boundary_condition' does not correspond to an existing type : '%s'\nAvailable conditions : %s" % (inner_boundary_condition, Disk.BOUNDARIES))
 		
 		if (outer_boundary_condition != None):
 			if (outer_boundary_condition in Disk.BOUNDARIES):
-				self.interaction_parameter['outer_boundary_condition'] = outer_boundary_condition
+				self.disk_parameter['outer_boundary_condition'] = outer_boundary_condition
 			else:
 				raise NameError("'outer_boundary_condition' does not correspond to an existing type : '%s'.\nAvailable conditions : %s" % (outer_boundary_condition, Disk.BOUNDARIES))
 		
+		
+		#####################################################################
+			
+			
 		if (torque_type != None):
 			if (torque_type in Disk.TORQUE_TYPES):
 				self.interaction_parameter['torque_type'] = torque_type

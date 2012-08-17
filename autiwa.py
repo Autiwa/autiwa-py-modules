@@ -273,6 +273,7 @@ def lancer_commande(commande):
 				raise TypeError("La commande n'est ni une liste, ni une chaîne de caractère.")
 		(process_stdout, process_stderr) = process.communicate()
 		returncode = process.poll()
+		# there is .poll() or .wait() but I don't remember the difference. For some kind of things, one of the two was not working
 		return (process_stdout, process_stderr, returncode)
 				
 def suppr_dossier(liste,liste_suppr):

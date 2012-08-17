@@ -12,6 +12,37 @@ from random import uniform
 import simulations_utilities
 import autiwa
 
+# Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
+BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
+								 'avakas-frontend2':"/home/ccossou/bin/mercury",
+								 'avakas-frontend1':"/home/ccossou/bin/mercury"}
+
+def prepareSubmission(hostname):
+  """This function will generate files usefull to launch the simulation, 
+  especially if the simulation has moved from a server to another. 
+  'runjob' and 'simulation.sh' will be generated. 'runjob' is the file that must be executed to launch the simulation. 
+  In fact, 'runjob' will submit to the queue scheduler the script 'simulation.sh' that contains all the 
+  binaries that must be launched by the simulation.
+  
+  Indeed, the scripts used to launch the simulation will be adapted in function of the hostname"""
+  
+  command = BINARY_FOLDER[hostname]+"/mercury\n" + \
+            BINARY_FOLDER[hostname]+"/element\n" + \
+            "echo `date '+%d-%m-%Y at %H:%M:%S'` `pwd` ': Done'>>~/qsub.log\n"
+            
+  # We define a bash script to launch the simulation in a queue
+  if ('arguin' in hostname):
+    script = simulations_utilities.SimpleJob(command) # For arguin
+    simulations_utilities.writeRunjobSGE("simulation.sh") # For arguin
+  elif('avakas' in hostname):
+    script = simulations_utilities.Job_PBS(command, walltime=48) # For avakas
+    simulations_utilities.writeRunjobPBS("simulation.sh") # For avakas
+  else:
+    raise NameError("The hostname %s is not recognized by the script" % hostname)
+  script.write()
+  
+  simulations_utilities.setExecutionRight("simulation.sh")
+
 def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
 	""" We will assume a certain number of parameters. For example, all bodies will be big bodies. 
 	We will also assume that all the bodies will be set with the 'asteroidal' properties (that is to say (a, e, I, g, n, M)). Plus, 
@@ -82,3 +113,31 @@ def get_aei_files():
 	liste_aei = process_stdout.split("\n")
 	liste_aei.remove('') # we remove an extra element that doesn't mean anything
 	return liste_aei
+
+def mercury_restart():
+	"""function that will restart a simulation. That means cleaning the existing file, 
+	and launch the simulation again, from the start
+	"""
+	
+	# For each folder were there is a problem (NaN in the output in other words) we clean and relaunch the simulation
+	command = "rm *.out *.dmp *.tmp *.sh.* *.aei *.clo"
+	print("\tCleaning the simulation files : %s" % command)
+	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
+	
+	command = "./runjob"
+	print("\tContinuing the simulation to allow it to finish properly : %s" % command)
+	job = subprocess.Popen(command, shell=True)
+	returnCode = job.wait()
+
+def mercury_continue():
+	"""function that will continue an existing simulation that did not have time to finish
+	"""
+	command = "rm *.aei *.clo"
+	print("\tCleaning the simulation files : %s" % command)
+	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
+
+	command = "./runjob"
+	print("\tStarting the simulation again : %s" % command)
+	job = subprocess.Popen(command, shell=True)
+	returnCode = job.wait()
+	

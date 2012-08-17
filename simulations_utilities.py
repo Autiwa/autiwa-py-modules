@@ -60,7 +60,7 @@ def str2str(value):
 	return value
 
 
-def writeRunjobSGE(command, queue, nb_proc=1):
+def writeRunjobSGE(command, queue="", nb_proc=1):
 	"""function that creates a script named 'runjob' that
 	will run a job on a queue. If the number of processor exceed 1, then
 	 the function will try to launch the job on every queue. If not, it
@@ -613,6 +613,17 @@ def number_fill(number, fill):
 		number = "0"+number
 	
 	return number
+
+def getHostname():
+	"""This function will return the machine name as a string. 
+	For instance, if the machine name is arguin, and that I get arguin.obs.u-bordeaux1.fr, I can test that with :
+	if ('arguin' in hostname):
+	"""
+	
+	(stdout, stderr, returnCode) = autiwa.lancer_commande("hostname")
+	hostname = stdout.split("\n")[0]
+	
+	return hostname
 
 if __name__=='__main__':
 	autiwa.printCR("Test of str2bool...")
