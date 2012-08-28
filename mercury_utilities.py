@@ -11,6 +11,7 @@ import mercury
 from random import uniform 
 import simulations_utilities
 import autiwa
+import subprocess
 
 # Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
 BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
