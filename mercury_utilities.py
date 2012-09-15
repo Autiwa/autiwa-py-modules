@@ -18,7 +18,7 @@ BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury",
 								 'avakas-frontend2':"/home/ccossou/bin/mercury",
 								 'avakas-frontend1':"/home/ccossou/bin/mercury"}
 
-def prepareSubmission(hostname):
+def prepareSubmission(hostname, walltime=48):
   """This function will generate files usefull to launch the simulation, 
   especially if the simulation has moved from a server to another. 
   'runjob' and 'simulation.sh' will be generated. 'runjob' is the file that must be executed to launch the simulation. 
@@ -36,7 +36,7 @@ def prepareSubmission(hostname):
     script = simulations_utilities.SimpleJob(command) # For arguin
     simulations_utilities.writeRunjobSGE("simulation.sh") # For arguin
   elif('avakas' in hostname):
-    script = simulations_utilities.Job_PBS(command, walltime=48) # For avakas
+    script = simulations_utilities.Job_PBS(command, walltime=walltime) # For avakas
     simulations_utilities.writeRunjobPBS("simulation.sh") # For avakas
   else:
     raise NameError("The hostname %s is not recognized by the script" % hostname)
