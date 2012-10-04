@@ -270,7 +270,7 @@ def lancer_commande(commande):
 		elif (type(commande)==str):
 				process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 		else:
-				raise TypeError("La commande n'est ni une liste, ni une chaîne de caractère.")
+				raise TypeError("The command is neither a string nor a list.")
 		(process_stdout, process_stderr) = process.communicate()
 		returncode = process.poll()
 		# there is .poll() or .wait() but I don't remember the difference. For some kind of things, one of the two was not working

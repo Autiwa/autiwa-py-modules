@@ -26,7 +26,7 @@ def run_command(commande):
 		elif (type(commande)==str):
 				process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 		else:
-				raise TypeError("La commande n'est ni une liste, ni une chaÃ®ne de caractÃ¨re.")
+				raise TypeError("The command is neither a string nor a list.")
 		(process_stdout, process_stderr) = process.communicate()
 		returncode = process.poll()
 		# there is .poll() or .wait() but I don't remember the difference. For some kind of things, one of the two was not working
@@ -82,7 +82,7 @@ def write_infos_in_f90_file():
 	f90source = open("git_infos.f90", 'w')
 	f90source.write(F90_BEGIN)
 	f90source.write("character(len=40), parameter :: commit = '%s'\n" % commit)
-	f90source.write("character(len=80), parameter :: branch = '%s'\n" % branch)
+	f90source.write("character(len=%d), parameter :: branch = '%s'\n" % (len(branch), branch))
 	if (isModifs):
 		f90source.write("character(len=80), parameter :: modifs = '/!\ There is non committed modifications'\n")
 	else:
