@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Module librement utilisable
-"""module to retrieve information about a git repository and create a source code containing thoses informations."""
+"""module to retrieve information about a git repository and create a source code containing thoses informations.
+
+
+HOW TO USE : 
+import git_infos
+git_infos.write_infos_in_f90_file()
+"""
 from __future__ import print_function
 
 __author__ = "Autiwa <autiwa@gmail.com>"
@@ -9,14 +15,7 @@ __date__ = "04 october 2012"
 __version__ = "$Revision: 1.0 $"
 __credits__ = """Thanks to Bastien for his help when I was learning Python and his usefull tutorial"""
 
-
-
-import sys
-import os
-import time
-import commands
 import subprocess
-import pdb
 
 def run_command(commande):
 		"""lance une commande qui sera typiquement soit une liste, soit une 
@@ -55,4 +54,40 @@ def get_current_revision():
 	commit = stdout.split()[1]
 	return commit
 
+def is_non_committed_modifs():
+	"""function that return as a boolean if theere is non committed modifications in the repository"""
+	(stdout, stderr, returnCode) = run_command("git diff|wc -l")
+	
+	if (returnCode != 0):
+		return None
+	
+	nbLines = int(stdout)
+	
+	return (nbLines != 0)
+
+def write_infos_in_f90_file():
+	"""This function will create a fortran file that will store, as variable, some infos about a git repository"""
+	
+	F90_BEGIN = "module git_infos\n" + \
+	            "! Automatically generated file through Makefile.py, do not modify manually !\n" + \
+	            "implicit none\n\n"
+
+	F90_END = "\nend module git_infos"
+
+	
+	branch = get_current_branch()
+	commit = get_current_revision()
+	isModifs = is_non_committed_modifs()
+	
+	f90source = open("git_infos.f90", 'w')
+	f90source.write(F90_BEGIN)
+	f90source.write("character(len=40), parameter :: commit = '%s'\n" % commit)
+	f90source.write("character(len=80), parameter :: branch = '%s'\n" % branch)
+	if (isModifs):
+		f90source.write("character(len=80), parameter :: modifs = '/!\ There is non committed modifications'\n")
+	else:
+		f90source.write("character(len=80), parameter :: modifs = 'This is a pure version (without any local modifs)'\n")
+	f90source.write(F90_END)
+	f90source.close()
+	
 	
