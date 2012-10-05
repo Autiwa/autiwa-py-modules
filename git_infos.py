@@ -16,6 +16,7 @@ __version__ = "$Revision: 1.0 $"
 __credits__ = """Thanks to Bastien for his help when I was learning Python and his usefull tutorial"""
 
 import subprocess
+import pdb
 
 def run_command(commande):
 		"""lance une commande qui sera typiquement soit une liste, soit une 
@@ -64,6 +65,18 @@ def is_non_committed_modifs():
 	nbLines = int(stdout)
 	
 	return (nbLines != 0)
+	
+def list_tag(commit):
+	"""list the tags that exists linking towar the considered commit
+	
+	Return :
+	The list of tags corresponding to 'commit'. If none, an empty list is returned.
+	"""
+	(stdout, stderr, returnCode) = run_command("git tag -l --contains %s" % commit)
+	
+	tags = stdout.split("\n")[0:-1] # We do not include the extra "" in the end.
+	
+	return tags 
 
 def write_infos_in_f90_file():
 	"""This function will create a fortran file that will store, as variable, some infos about a git repository"""
@@ -78,6 +91,7 @@ def write_infos_in_f90_file():
 	branch = get_current_branch()
 	commit = get_current_revision()
 	isModifs = is_non_committed_modifs()
+	tags = list_tag(commit)
 	
 	f90source = open("git_infos.f90", 'w')
 	f90source.write(F90_BEGIN)
@@ -87,6 +101,14 @@ def write_infos_in_f90_file():
 		f90source.write("character(len=80), parameter :: modifs = '/!\ There is non committed modifications'\n")
 	else:
 		f90source.write("character(len=80), parameter :: modifs = 'This is a pure version (without any local modifs)'\n")
+		
+	
+	if (len(tags)==0):
+		tag_text = "There is no tag"
+	else:
+		tag_text = " ; ".join(tags)
+	
+	f90source.write("character(len=%d), parameter :: tags = '%s'\n" % (len(tag_text), tag_text))
 	f90source.write(F90_END)
 	f90source.close()
 	
