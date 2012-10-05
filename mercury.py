@@ -540,7 +540,7 @@ class Big(object):
 		"""write all the data in a file named 'big.in' in the current working directory"""
 		
 		#########################
-		#on crée le fichier et on écrit l'entête
+		#on crée le fichier et We write the header
 		#########################
 		bigin = open('big.in','w')
 
@@ -660,7 +660,7 @@ class Small(object):
 		"""write all the data in a file named 'big.in' in the current working directory"""
 		
 		#########################
-		#on crée le fichier et on écrit l'entête
+		#on crée le fichier et We write the header
 		#########################
 		smallin = open('small.in','w')
 
@@ -802,9 +802,9 @@ class Element(object):
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
 		
-		## On génère le fichier "element.in" avec les valeurs passées en paramètres.
+		## We generate the file "element.in" with values passed in parameter.s.
 		element = open('element.in','w')
-		## On écrit l'entête
+		## We write the header
 		element.write(Element.ELEMENT_START)
 		## On écrit dans quel système de coordonnées on veut écrire les données
 		element.write(" type of elements (central body, barycentric, Jacobi) = "+str(self.coord)+"\n")
@@ -1092,9 +1092,9 @@ class Close(object):
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
 		
-		## On génère le fichier "element.in" avec les valeurs passées en paramètres.
+		## We generate the file "element.in" with values passed in parameter.s.
 		close = open('close.in','w')
-		## On écrit l'entête
+		## We write the header
 		close.write(Close.CLOSE_START)
 		## Dans quel format on veut écrire les temps (jours ou années)
 		close.write(" express time in days or years = "+str(self.time_format)+"\n")
@@ -1142,7 +1142,7 @@ class Disk(object):
 																"!  orbital distance and the second the surface density in g/cm^2", 
 						'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
 						             "! (used for temperature profile for instance)", 
-						'inner_width_smoothing':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
+						'inner_smoothing_width':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
 						                        "! the inner edge where the surface density is damped so\n" + \
 						                        "! that the surface density at the inner edge will be 0",
 						'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
@@ -1152,9 +1152,13 @@ class Disk(object):
 						'dissipation_type':"! integer to tell if there is dissipation of the disk or not. \n" +\
 	                                           "! 0 for no dissipation\n" +\
 	                                           "! 1 for viscous dissipation\n" +\
-	                                           "! 2 for exponential decay of the initial profile", 
+	                                           "! 2 for exponential decay of the initial profile\n" +\
+	                                           "! 3 for mixed exponential decay (viscous then photoevap)", 
+	          'tau_viscous':"! (years) the exponential decay for the viscous phase (dissipation_type = 3)", 
+	          'tau_photoevap':"! (years) exponential decay for photoevaporation phase (dissipation_type = 3)", 
+	          'dissipation_time_switch':'! (years) the time when we switch from viscous to photoevap (dissipation_type = 3)',
 						'disk_exponential_decay':'! Value of the exponential decay timescale for the dissipation of the disk\n' +\
-						                         '! (only if dissipation_type is equal to 2)',
+						                         '! (only if dissipation_type = 2)',
 						'inner_boundary_condition':"! %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
 						'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
 						'sample':"! number of point to the 1D radial grid of the disk"}
@@ -1177,7 +1181,8 @@ class Disk(object):
 	
 	
 	def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
-	             is_turbulence=None, turbulent_forcing=None, inner_width_smoothing=None,
+	             is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
+	             dissipation_time_switch=None, 
 	             sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
 	             torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
 	             mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1201,8 +1206,17 @@ class Disk(object):
 		if (disk_edges != None):
 			self.disk_parameter['disk_edges'] = disk_edges
 		
-		if (inner_width_smoothing != None):
-			self.disk_parameter['inner_width_smoothing'] = inner_width_smoothing
+		if (inner_smoothing_width != None):
+			self.disk_parameter['inner_smoothing_width'] = inner_smoothing_width
+		
+		if (tau_viscous != None):
+			self.disk_parameter['tau_viscous'] = tau_viscous
+		
+		if (tau_photoevap != None):
+			self.disk_parameter['tau_photoevap'] = tau_photoevap
+		
+		if (dissipation_time_switch != None):
+			self.disk_parameter['dissipation_time_switch'] = dissipation_time_switch
 		
 		if (viscosity != None):
 			self.disk_parameter['viscosity'] = viscosity
@@ -1270,9 +1284,9 @@ class Disk(object):
 	def write(self):
 		"""write all the data in a file named 'element.in' in the current working directory"""
 		
-		## On génère le fichier "disk.in" avec les valeurs passées en paramètre
+		## We generate the file "disk.in" with values passed in parameter.
 		disk = open('disk.in','w')
-		## On écrit l'entête
+		## We write the header
 		disk.write(Disk.DISK_START)
 		
 		disk.write("*****************************\n")
