@@ -160,9 +160,11 @@ def generateElementIN(nb_outputs=2000):
 	elementin.write()
 	
 def generateOutputs():
+	command = "rm *.aei"
+	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
+
 	# We want to know the name of the machine, to adapt the way we will launch the simulations in function
 	hostname = simulations_utilities.getHostname()
-	
 	command = BINARY_FOLDER[hostname]+"/element"
 	
 	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
