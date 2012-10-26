@@ -908,7 +908,7 @@ class Param(object):
 		
 	
 	@property
-	def temps_integration(self):
+	def integration_time(self):
 		"""return the integration time, regards to the start and stop time"""
 		
 		return self.stop_time - self.start_time

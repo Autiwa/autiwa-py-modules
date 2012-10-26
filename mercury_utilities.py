@@ -142,3 +142,28 @@ def mercury_continue():
 	job = subprocess.Popen(command, shell=True)
 	returnCode = job.wait()
 	
+	
+def generateElementIN(nb_outputs=2000):
+	"""Will create a element.in with a low number of outputs then generate them"""
+	
+	# We get the integration time
+	paramin = mercury.Param(algorithme="HYBRID", start_time=0, stop_time=0, output_interval=0, 
+	h=0)
+	paramin.read()
+	integration_time = paramin.integration_time
+	
+	aei_time = integration_time / float(nb_outputs)
+	
+	# Setting the output interval to 0 ensure that we will have every output written in the xv.out in the element files.
+	elementin = mercury.Element(format_sortie=" a8.5 e8.6 i8.4 g8.4 n8.4 l8.4 m13e ", coord="Cen", 
+	output_interval=aei_time, time_format="years", relative_time="yes")
+	elementin.write()
+	
+def generateOutputs():
+	# We want to know the name of the machine, to adapt the way we will launch the simulations in function
+	hostname = simulations_utilities.getHostname()
+	
+	command = BINARY_FOLDER[hostname]+"/element"
+	
+	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
+	
