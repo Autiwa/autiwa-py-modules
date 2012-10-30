@@ -698,9 +698,10 @@ def get_subplot_shape(number_of_plots):
 
   HOW TO :
   fig = pl.figure(1)
-	nb_subplot = get_subplot_shape(5)
-	nb_subplot += 1
-  plot_dof = fig.add_subplot(nb_subplot)"""
+  subplot_i = 0
+	(nb_line, nb_row) = get_subplot_shape(5)
+	subplot_i += 1
+  plot_dof = fig.add_subplot(nb_line, nb_row, subplot_i)"""
   nb_plots_x = 1
   nb_plots_y = 1
   while (nb_plots_x * nb_plots_y < number_of_plots):
@@ -709,7 +710,7 @@ def get_subplot_shape(number_of_plots):
     else:
       nb_plots_x += 1
 
-  return 100*nb_plots_x + 10 * nb_plots_y
+  return (nb_plots_x, nb_plots_y)
 
 # Si le module est lancé directement, on teste certaines méthodes.
 if __name__=='__main__':
