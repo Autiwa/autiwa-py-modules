@@ -12,6 +12,7 @@ from random import uniform
 import simulations_utilities
 import autiwa
 import subprocess
+import pdb
 
 # Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
 BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
@@ -169,3 +170,40 @@ def generateOutputs():
 	
 	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
 	
+def get_column_position(filename):
+	"""function that return the list of positions to be used to retrieve the elements of a .aei file. 
+	Indeed, the position is fixed once and for all for a given simulation. So we only check once, and after we use theses values. 
+	The function return tuples for each elements, to be used for a range of array. 
+	
+	parameter : 
+	filename : the name of the .aei file to test, as a string
+	
+	For instance (a, b) for the first element, is to be used on a line like : line[a:b]
+	"""
+	
+	object_file = open(filename, 'r')
+	
+	for i in range(4):
+		object_file.readline()
+	
+	line = object_file.readline()
+	object_file.close()
+	
+	words = line.split()
+	
+	lengths = [len(word) for word in words]
+	
+	# marks will be the consecutive end of each word. The first element is simply 
+	# 0 because we will generate after the begin and end of each word.
+	marks = [0] 
+	pos = 0 
+	for (length, word) in zip(lengths, words):
+		# For each word, we start to check starting from the end of the previous word. 
+		pos += length + line[pos:].index(word)
+		marks.append(pos)
+	
+	edges = []
+	for (begin, end) in zip(marks[:-1], marks[1:]):
+		edges.append((begin, end))
+	
+	return edges
