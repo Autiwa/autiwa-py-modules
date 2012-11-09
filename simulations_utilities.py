@@ -486,12 +486,18 @@ def setParameter(parameter, nb_planets):
 	elif (type(parameter) == list):
 		# We assume in this case that we specified explicitely the values for all the planet and do not change anything.
 		return parameter
-	elif (type(parameter) == tuple and parameter[2] == 'uniform'):
-		output_parameters = [significativeRound(uniform(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)]
-		return output_parameters
-	elif (type(parameter) == tuple and parameter[2] == 'gaussian'):
-		output_parameters = [significativeRound(gauss(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)]
-		return output_parameters
+	elif (type(parameter) == tuple):
+		output_parameters = []
+		if (type(parameter[0]) == list):
+			output_parameters = parameter[0]
+			nb_planets -= len(output_parameters)
+			parameter = parameter[1]
+		if (parameter[2] == 'uniform'):
+			output_parameters.extend([significativeRound(uniform(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)])
+			return output_parameters
+		elif (parameter[2] == 'gaussian'):
+			output_parameters.extend([significativeRound(gauss(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)])
+			return output_parameters
 	else:
 		raise ValueError("The way you're trying to set the parameter doesn't seems to be implemented so far")
 

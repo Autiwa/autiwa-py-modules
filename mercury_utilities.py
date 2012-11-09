@@ -202,8 +202,4 @@ def get_column_position(filename):
 		pos += length + line[pos:].index(word)
 		marks.append(pos)
 	
-	edges = []
-	for (begin, end) in zip(marks[:-1], marks[1:]):
-		edges.append((begin, end))
-	
-	return edges
+	return marks
