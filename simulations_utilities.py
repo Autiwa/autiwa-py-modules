@@ -489,7 +489,7 @@ def setParameter(parameter, nb_planets):
 	elif (type(parameter) == tuple):
 		output_parameters = []
 		if (type(parameter[0]) == list):
-			output_parameters = parameter[0]
+			output_parameters = list(parameter[0]) # Otherwise, the element itself is modified when output_parameters is modified.
 			nb_planets -= len(output_parameters)
 			parameter = parameter[1]
 		if (parameter[2] == 'uniform'):
