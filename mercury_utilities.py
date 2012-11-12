@@ -13,6 +13,7 @@ import simulations_utilities
 import autiwa
 import subprocess
 import pdb
+import os
 
 # Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
 BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
@@ -169,6 +170,30 @@ def generateOutputs():
 	command = BINARY_FOLDER[hostname]+"/element"
 	
 	(stdout, stderr, returnCode) = autiwa.lancer_commande(command)
+
+def extend_simulation(extension):
+	"""Will increase the integration time of a simulation in the current working directory.
+	
+	Parameters :
+	extension : (float) the extension time in years
+	"""
+	# We get the integration time
+	paramin = mercury.Param(algorithme="HYBRID", start_time=0, stop_time=0, output_interval=0, 
+	h=0)
+	paramin.read()
+	integration_time = paramin.integration_time
+	
+	stop_time = paramin.get_stop_time()
+	
+	paramin.set_stop_time(stop_time + extension * 365.25)
+	
+	paramin.write()
+	if (os.path.isfile("param.dmp")):
+		paramin.write(filename="param.dmp")
+	
+	if (os.path.isfile("param.tmp")):
+		paramin.write(filename="param.tmp")
+	
 	
 def get_column_position(filename):
 	"""function that return the list of positions to be used to retrieve the elements of a .aei file. 

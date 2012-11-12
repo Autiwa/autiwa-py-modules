@@ -934,7 +934,7 @@ class Param(object):
 		"""explicitely set the stop_time variable. 
 		
 		Parameter
-		stop_time : stop time, in years
+		stop_time : stop time, in days
 		"""
 		
 		self.stop_time = stop_time
@@ -947,7 +947,7 @@ class Param(object):
 	def get_stop_time(self):
 		"""return the value contained in 'self.stop_time'
 		
-		Return : stop_time (in years)
+		Return : stop_time (in days)
 		"""
 		
 		return self.stop_time
