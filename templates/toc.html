@@ -1,0 +1,55 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/">
+<head>
+  <title>${book.title}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link href="../Styles/stylesheet.css" rel="stylesheet" type="text/css" />
+  <style type="text/css">
+.toc-head  { display: block;
+ font-size: large;
+ text-align: center;
+ margin-top: 20%;
+ margin-bottom: 1.5em;
+ margin-left: 0em;
+ margin-right: 0em;
+ text-indent: 0em;
+ }
+
+.tocEntry-1, .tocEntry-2, .tocEntry-3, .tocEntry-4 {
+ display: block;
+ font-size: small;
+ margin-top: 0.2em;
+ margin-bottom: 0em;
+ margin-left: 0em;
+ margin-right: 0em;
+ text-indent: 0em;
+}
+
+.tocEntry-2 {
+	text-indent: 1em;
+}
+.tocEntry-3 {
+	text-indent: 2em;
+}
+.tocEntry-4 {
+	text-indent: 3em;
+}
+
+
+  </style>
+</head>
+<body>
+  <h1 class="toc-head"> Table Des Mati&egrave;res</h1>
+  <py:def function="tocEntry(node)">
+    <div class="tocEntry-${node.depth}">
+      <a href="${node.href}">${node.title}</a>
+    </div>
+    <py:for each="child in node.children">
+    ${tocEntry(child)}
+    </py:for>
+  </py:def>
+  <py:for each="child in book.getTocMapRoot().children">
+  ${tocEntry(child)}
+  </py:for>
+</body>
+</html>

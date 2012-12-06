@@ -1,0 +1,19 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/">
+<head>
+  <title>${item.name}</title>
+  <style type="text/css">
+div.imageWrapper {
+  float:left;
+}
+
+div.imageWrapper img {
+  height: 99%;
+  max-width: 100%;
+}
+</style>
+</head>
+<body>
+  <div class="imageWrapper"><img src="../${item.destPath}" alt="${item.name}"/></div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+body {
+    color: Black;
+    background: White;
+    font-family: "Georgia", "serif";
+    text-align: justify;
+    margin-bottom: 5pt;
+    margin-top: 5pt;
+}
+
+h1,h2,h3,h4 {
+font-weight: bold;
+text-align: center;
+}
+
+p {
+    text-indent: 1.5em;
+    margin-bottom: 0pt;
+    margin-top: 0pt;
+    }
+
+.bigskip {
+	display:block; 
+	margin-top: 1.5em;
+}
+
+p.noindent {
+    text-indent: 0%
+    }
+p.poem {
+    text-indent: 0%;
+    margin-left: 10%
+    }
+p.letter {
+    text-indent: 0%;
+    margin-left: 10%;
+    margin-right: 10%
+    }
+p.footnote {
+    font-size: 80%;
+    text-indent: 0%;
+    margin-left: 0%;
+    margin-right: 0%
+    }
