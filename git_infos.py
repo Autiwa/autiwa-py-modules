@@ -93,6 +93,9 @@ def write_infos_in_f90_file():
 	isModifs = is_non_committed_modifs()
 	tags = list_tag(commit)
 	
+	if (branch != 'master'):
+		print("Warning: The current branch is %s" % branch)
+	
 	f90source = open("git_infos.f90", 'w')
 	f90source.write(F90_BEGIN)
 	f90source.write("character(len=40), parameter :: commit = '%s'\n" % commit)
