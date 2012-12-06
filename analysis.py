@@ -10,17 +10,17 @@ import numpy as np
 from fractions import Fraction
 
 def get_x_s(mass):
-	"""with the mass of the planet in solar mass, 
-	and for planets around 3AU in my disk (for the fixed value of 'h')"""
-	mstar = 1.0 # the stellar mass in solar mass
-	b_over_h = 0.4
-	h = 0.045
-	q = mass / mstar
-	adiabatic_index = 1.4
-	
-	x_s = (1.1 * (0.4 / b_over_h)**0.25 / adiabatic_index**0.25) * np.sqrt(q / h)
-	
-	return x_s
+  """with the mass of the planet in solar mass, 
+  and for planets around 3AU in my disk (for the fixed value of 'h')"""
+  mstar = 1.0 # the stellar mass in solar mass
+  b_over_h = 0.4
+  h = 0.045
+  q = mass / mstar
+  adiabatic_index = 1.4
+  
+  x_s = (1.1 * (0.4 / b_over_h)**0.25 / adiabatic_index**0.25) * np.sqrt(q / h)
+  
+  return x_s
 
 def get_possible_resonances(periodRatio, uncertainty=0.05, denominator_limit=12, numerator_limit=20, sampling=10):
   """Give a list of 'Fraction' objects that correspond to possible Mean Motion Resonances for a given period ratio. 
