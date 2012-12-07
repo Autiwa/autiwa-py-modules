@@ -1140,6 +1140,8 @@ class Disk(object):
                                 "! If 'manual' is specified, then the surface density profile will instead be\n" +\
                                 "!  read from 'surface_density_profile.dat', two columns, the first being \n" +\
                                 "!  orbital distance and the second the surface density in g/cm^2", 
+            'is_irradiation':"! (0, False) if there is no stellar irradiation to compute temperature profile\n" + \
+                             "!, (1, True) if there is stellar irradiation", 
             'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
                          "! (used for temperature profile for instance)", 
             'inner_smoothing_width':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
@@ -1182,7 +1184,7 @@ class Disk(object):
   
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
-               dissipation_time_switch=None, 
+               dissipation_time_switch=None, is_irradiation=None, 
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
                torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
                mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1202,6 +1204,9 @@ class Disk(object):
     
     if (surface_density != None):
       self.disk_parameter['surface_density'] = surface_density
+    
+    if (is_irradiation != None):
+      self.disk_parameter['is_irradiation'] = int(is_irradiation)
     
     if (disk_edges != None):
       self.disk_parameter['disk_edges'] = disk_edges
