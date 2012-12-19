@@ -24,7 +24,7 @@ DJ = 1.326 # g/cm³ densité moyenne d'une planète géante (ici, densité moyen
 DT = 5.515 # g/cm³ densité moyenne d'une planète de type terrestre (ici, densité moyenne de la terre)
 
 # en mètre valeur d'une unité astronomique
-UA = 1.495979e11
+AU = 1.495979e11
 
 # nombre de jours dans un an, c'est plus simple ensuite pour calculer T
 YEAR = 365.25
