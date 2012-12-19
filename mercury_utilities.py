@@ -15,12 +15,13 @@ import subprocess
 import pdb
 import os
 
-# Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
-BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
-                 'avakas-frontend2':"/home/ccossou/bin/mercury",
-                 'avakas-frontend1':"/home/ccossou/bin/mercury"}
+#~ # Dictionnary that store, for each server, the location of the binaries for mercury (in this folder, there are mercury, element and close
+#~ BINARY_FOLDER = {'arguin.obs.u-bordeaux1.fr':"/home/cossou/bin/mercury", 
+                 #~ 'avakas-frontend2':"/home/ccossou/bin/mercury",
+                 #~ 'avakas-frontend1':"/home/ccossou/bin/mercury",
+                 #~ 'new-host.home':"/Users/cossou/Documents/programmation/mercury"}
 
-def prepareSubmission(hostname, walltime=48):
+def prepareSubmission(BinaryPath, walltime=48):
   """This function will generate files usefull to launch the simulation, 
   especially if the simulation has moved from a server to another. 
   'runjob' and 'simulation.sh' will be generated. 'runjob' is the file that must be executed to launch the simulation. 
@@ -29,20 +30,26 @@ def prepareSubmission(hostname, walltime=48):
   
   Indeed, the scripts used to launch the simulation will be adapted in function of the hostname"""
   
-  command = BINARY_FOLDER[hostname]+"/mercury\n" + \
-            BINARY_FOLDER[hostname]+"/element\n" + \
+  command = BinaryPath+"/mercury\n" + \
+            BinaryPath+"/element\n" + \
             "echo `date '+%d-%m-%Y at %H:%M:%S'` `pwd` ': Done'>>~/qsub.log\n"
+  
+  # We want to know the name of the machine, to adapt the way we will launch the simulations in function
+  hostname = simulations_utilities.getHostname()
             
   # We define a bash script to launch the simulation in a queue
   if ('arguin' in hostname):
     script = simulations_utilities.SimpleJob(command) # For arguin
     simulations_utilities.writeRunjobSGE("simulation.sh") # For arguin
+    script.write()
   elif('avakas' in hostname):
     script = simulations_utilities.Job_PBS(command, walltime=walltime) # For avakas
     simulations_utilities.writeRunjobPBS("simulation.sh") # For avakas
+    script.write()
   else:
-    raise NameError("The hostname %s is not recognized by the script" % hostname)
-  script.write()
+    print("The hostname %s is not recognized by the script" % hostname)
+    print("Unable to prepare submission. Only valid for tests.")
+  
   
   simulations_utilities.setExecutionRight("simulation.sh")
 
