@@ -53,7 +53,7 @@ def prepareSubmission(BinaryPath, walltime=48):
   
   simulations_utilities.setExecutionRight("simulation.sh")
 
-def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
+def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0, d=None):
   """ We will assume a certain number of parameters. For example, all bodies will be big bodies. 
   We will also assume that all the bodies will be set with the 'asteroidal' properties (that is to say (a, e, I, g, n, M)). Plus, 
   g, n, M ill be randomly generated (g the argument of pericentre (degrees), n the longitude of the ascending node (degrees), 
@@ -68,6 +68,8 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
   
   m, a, e, I: they must be lists of the same length, one element for each planet. 
   (m the mass (in solar mass), a the semi major axis (in AU), e the eccentricity, I the inclination (in degrees))
+  
+  d : The density for each body (in g/cm^3), optional argument
   
   
   Return : 
@@ -93,6 +95,8 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
     if (len(param) != nb_planets):
       raise ValueError("(m, a, e, I) must be of the same length")
   
+  if (d == None):
+    d = [None] * nb_planets
   
   # We generate randomly g, n, and M
   g = simulations_utilities.setParameter((0, 360, 'uniform'), nb_planets)
@@ -105,9 +109,9 @@ def definePlanetarySystem(m, a, e, I, m_star=1.0, epoch=0):
   
   bodies = []
   index = 1
-  for (mi, ai, ei, Ii, gi, ni, Mi) in zip(m, a, e, I, g, n, M):
+  for (mi, ai, ei, Ii, gi, ni, Mi, di) in zip(m, a, e, I, g, n, M, d):
     bodies.append(mercury.BodyAst("big", m=mi, a=ai, e=ei, I=Ii, 
-g=gi, n=ni, M=Mi, ep=epoch))
+g=gi, n=ni, M=Mi, ep=epoch, d=di))
     index += 1
   
   return mercury.PlanetarySystem(bodies=bodies, m_star=m_star, epoch=epoch)
