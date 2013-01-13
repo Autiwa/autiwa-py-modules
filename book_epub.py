@@ -14,6 +14,7 @@ import re
 import codecs
 import pdb
 import os
+import xml.etree.ElementTree as ET
 
 __help__ = """
 Module to parse and create an ebook using the epub module. 
@@ -55,13 +56,16 @@ if not(os.path.isdir(TEMPLATE_DIR)):
 
 
 EPUBCHECK = os.path.join(modulePath, 'epubcheck/epubcheck-3.0-RC-2.jar')
-if not(os.path.isdir(EPUBCHECK)):
+if not(os.path.isfile(EPUBCHECK)):
   print("Warning: 'epubcheck' is not found in the subdirectory of\
    the 'book_epub' module. The .epub will not be checked.")
+  pdb.set_trace()
 
 class Section:
+  
+  section_id = 0 # usefull for the default filename of the object
 
-  def __init__(self):
+  def __init__(self, title='', filename="default"):
     """
     
     variables : 
@@ -75,13 +79,51 @@ class Section:
            separated by space
            """
     
-    self.title = ''
+    Section.section_id += 1
+    
+    self.title = title
+    
+    if (filename == "default"):
+      self.filename = "section_%d" % Section.section_id # without the extension
+    else:
+      self.filename = filename
     self.subsections = []
     self.css = ''
     self.text = []
-    self.templateFileName = 'ez-section.html'
     
 class Book:
+  """
+  Allow us to create an object that we will try to convert into en epub. We must create the objet, then parse a xml file to fill in the properties of the book. 
+  
+  Basic example : 
+  > book = book_epub.Book(title='Le Passeur', authors=['Lois Lowry'], lang='fr-FR', cover='le_passeur.jpg')
+  > 
+  > # the text file must be in utf-8
+  > book.parseBook('le_passeur.xml')
+  > book.make('epub/%s' % book.title)
+  
+  The XML must have the following properties : 
+  _ The book and all its properties must be in a "<book></book>".
+  _ Each paragraph is <par</par>
+  _ each section start with <section>the section title</section>
+  _ the paragraph can have one or more of the following options : 
+    * poem : italic style for poem and songs
+    * bigskip : ahead of the current paragraph, there will be an extra space
+    
+    To define the options : <par option="poem bigskip"> or <par option="poem">
+  _ for italic text, braket the text with "<i></i>
+  _ to define footnotes, use where you want the mark : "<footnote>the text of the footnote</footnote>". The footnote texts will appear at the end of the book.
+  
+  Basic Example of XML book : 
+  <book>
+  <section>Chapter 1</section>
+  <par>Lorem ipsum blabla bla.</par>
+  
+  <par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
+  anything though.</footnote>
+  </par>
+  </book>
+  """
   
   def __init__(self, title='', authors = [], cover='', lang='en-US'):
     """
@@ -102,20 +144,38 @@ class Book:
     self.sections = []
     self.templateLoader = TemplateLoader(TEMPLATE_DIR)
     
-  def __addSection(self, section, id, depth):
+  def __addSection(self, section, depth):
     if depth > 0:
-      stream = self.templateLoader.load(section.templateFileName).generate(section = section)
-      try:
-        html = stream.render('xhtml', doctype = 'xhtml11', drop_xml_decl = False)
-      except:
-        pdb.set_trace()
-      item = self.epub.addHtml('', '%s.html' % id, html)
+      html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n' + \
+             '<html xmlns="http://www.w3.org/1999/xhtml">\n' + \
+             '<head>\n' + \
+             '  <title>%s</title>\n' % section.title + \
+             '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' + \
+             '  <link href="../Styles/stylesheet.css" rel="stylesheet" type="text/css" />\n' + \
+             '  <style type="text/css">\n' + \
+             '%s\n' % section.css + \
+             '  </style>\n' + \
+             '</head>\n' + \
+             '<body>\n' + \
+             '  <h1>%s</h1>\n' % section.title
+      for paragraph in section.text:
+        html += '  %s\n\n' % paragraph
+      
+      html += '</body>\n</html>'
+      html = html.encode('utf-8')
+      #~ stream = self.templateLoader.load(section.templateFileName).generate(section = section)
+      #~ try:
+        #~ html = stream.render('xhtml', doctype = 'xhtml11', drop_xml_decl = False)
+      #~ except:
+        #~ pdb.set_trace()
+      
+      item = self.epub.addHtml('', '%s.html' % section.filename, html)
       self.epub.addSpineItem(item)
       self.epub.addTocMapNode(item.destPath, section.title, depth)
-      id += '.'
+
     if len(section.subsections) > 0:
       for (i, subsection) in enumerate(section.subsections):
-        self.__addSection(subsection, id + str(i + 1), depth + 1)
+        self.__addSection(subsection, depth + 1)
   
   def setSections(self, sections):
     """
@@ -133,73 +193,76 @@ class Book:
     
     Parameters : 
     path : the path to the text file. For instance "lorem_ipsum.txt"
-    startLineNum=0 : (integer) the line at which we want to start the 
-                     parser (usefull we we want to skip some preamble, 
-                     but the specified line MUST BE after the preamble, 
-                     right before the first chapter)
-                     If not specified, the default value is 0
-    endLineNum=None : (integer) the line at which we stop the parser. 
-                      If not specified, the file will be parsed up to 
-                      the end.
     """
     
-    PATTERN = re.compile(r'%s \d+$' % CHAPTER)
-    sections = []
+    tree = ET.parse(path)
+    root = tree.getroot()
     
-    # This section will contain everything before the first chapter. 
-    # Only used when the starting line is 0. Else, we assume that 
-    # the starting line is right before the first chapter
-    if (startLineNum == 0):
-      section = Section()
-      section.title = "Infos"
-      sections.append(section)
-    
-    paragraph = u''
-    blanck_line_count = 0 # The number of blanck line after a paragraph
-    fin = codecs.open(path, 'r', 'utf-8')
-    lineNum = 0
-    for line in fin:
-      lineNum += 1
-      if lineNum < startLineNum:
-        continue
-      if endLineNum > 0 and lineNum > endLineNum:
-        break
-      line = line.strip()
-      if PATTERN.match(line):
-        # If we match the regexp for the title of a chapter, we define a new chapter
-        section = Section()
-        section.css = """.em { font-style: italic; }"""
-        section.title = line
-        sections.append(section)
-      elif line == u'':
-        # If this is a blanck line, it means that : 
-        # 1/ this is the end of a paragraph
-        # 2/ we want a big space if this is not the first consecutive blanck lineinfo
-              
-        blanck_line_count += 1
-        if (paragraph != u''):
-          tmp = formatParagraph(paragraph)
-          
-          # If to end the paragraph there is several blanck line, 
-          # we use the class 'bigskip' for this one. 
-          # This does not apply to the first paragraph of a chapter
-          if ((len(section.text) > 0) and (blanck_line_count > 1)):
-            tmp = [(tmp[0][0], 'bigskip')]
-          
-          section.text.append(tmp)
-          paragraph = u''
-          blanck_line_count = 0
+    footnote = [] # The list of footnote text, we will write them at the end of the book
+    footnote_ref = [] # the corresponing ref for each footnote
 
-      else:
-        # We add the current line at the current paragraph
-        if paragraph != u'':
-          paragraph += u' '
-        paragraph += line
+    sections = []
+    for child in root:
+      tag = child.tag
+      
+      if (tag == 'section'):
+        section = Section()
+        section.title = child.text
+        sections.append(section)
+      elif (tag == 'par'):
+        texts = [text for text in child.itertext()]
+        
+        for grandchild in child._children:
+          if (grandchild.text != None):
+            id_text = texts.index(grandchild.text)
+          
+          
+          if (grandchild.tag == 'i'):
+            texts[id_text] = '<span class="italic">%s</span>' % texts[id_text]
+          elif (grandchild.tag == 'footnote'):
+            footnote.append(texts[id_text])
+            nb_footnote = len(footnote)
+            footnote_ref_tmp = "%s.html#footnotebackref_%d" % (section.filename, nb_footnote)
+            footnote_ref.append(footnote_ref_tmp)
+            texts[id_text] = '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote)
+          elif (grandchild.tag == 'br'):
+            try:
+              id_tail = texts.index(grandchild.tail)
+              texts.insert(id_tail, '<br />')
+            except:
+              print("Warning: Apparently two tag seems to be one next to each other, this make the parser bug.")
+              pdb.set_trace()
+        
+        tmp = '<p>'
+        styles = []
+        if child.attrib.has_key('option'):
+          options = child.attrib['option'].split()
+          
+          for option in options:
+            if (option == 'bigskip'):
+              styles.append('bigskip')
+            elif (option == 'poem'):
+              styles.append('poem')
+          
+          if styles:
+            tmp = '<p class="%s">' % " ".join(styles)
+            
+        tmp += "%s</p>\n" % " ".join(texts)
+        section.text.append(tmp)
     
-    # Special treatment for the last paragraph of the book
-    if paragraph != u'':
-      section.text.append(formatParagraph(paragraph))
-    
+    if (len(footnote) != 0):
+      section = Section()
+      section.title = "Notes"
+      section.filename = "footnote"
+      sections.append(section)
+      tmp = ''
+      for nb in range(len(footnote)):
+        footnote_text = footnote[nb]
+        ref = footnote_ref[nb]
+        tmp += '\n\n<br /><br /><a id="footnote_%d"></a><a href="%s">[%d]</a> %s' % (nb+1, ref, nb+1, footnote_text)
+      tmp = "<p>%s</p>\n" % tmp
+      section.text.append(tmp)
+
     self.setSections(sections)
 
   
@@ -221,10 +284,10 @@ class Book:
     self.epub.addCss(os.path.join(TEMPLATE_DIR, "stylesheet.css"), "stylesheet.css")
     root = Section()
     root.subsections = self.sections
-    self.__addSection(root, 's', 0)
+    self.__addSection(root, 0)
     self.epub.createBook(outputDir)
     self.epub.createArchive(outputDir, outputFile)
-    if os.path.isdir(EPUBCHECK):
+    if os.path.isfile(EPUBCHECK):
       self.epub.checkEpub(EPUBCHECK, outputFile)
     else:
       print("Unable to find Epubcheck, .epub not checked")

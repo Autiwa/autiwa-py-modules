@@ -18,7 +18,7 @@ if not(os.path.isdir(TEMPLATE_DIR)):
   raise IOError("The template folder '%s' does not exists" % TEMPLATE_DIR)
 
 EPUBCHECK = os.path.join(modulePath, 'epubcheck/epubcheck-3.0-RC-2.jar')
-if not(os.path.isdir(EPUBCHECK)):
+if not(os.path.isfile(EPUBCHECK)):
   print("Warning: 'epubcheck' is not found in the subdirectory of\
    the 'book_epub' module. For the test, the .epub will not be checked.")
 
@@ -320,19 +320,19 @@ class EpubBook:
   
   def createBook(self, rootDir):
     try:
-    if self.titlePage:
-      self.__makeTitlePage()
-    if self.tocPage:
-      self.__makeTocPage()
-    self.rootDir = rootDir
-    self.makeDirs()
-    self.__writeMimeType()
-    self.__writeItems()
-    self.__writeContainerXML()
-    self.__writeContentOPF()
-    self.__writeTocNCX()
+      if self.titlePage:
+        self.__makeTitlePage()
+      if self.tocPage:
+        self.__makeTocPage()
+      self.rootDir = rootDir
+      self.makeDirs()
+      self.__writeMimeType()
+      self.__writeItems()
+      self.__writeContainerXML()
+      self.__writeContentOPF()
+      self.__writeTocNCX()
     except:
-    pdb.set_trace()
+      pdb.set_trace()
 
 
 def test():

@@ -11,14 +11,8 @@ ${section.css}
 <body>
   <h1>${section.title}</h1>
   <py:for each="paragraph in section.text">
-  <p>
-    <py:choose test="type(paragraph)">
-    <py:when test="type([])">
-		<py:choose test="className" py:for="text, className in paragraph"><py:when test="''">$text</py:when><py:otherwise><span class="$className">$text</span></py:otherwise></py:choose>
-    </py:when>
-    <py:otherwise>$paragraph</py:otherwise>
-    </py:choose>
-  </p>
+  $paragraph
+  
   </py:for>
 </body>
 </html>
