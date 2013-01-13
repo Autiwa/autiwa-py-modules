@@ -19,24 +19,38 @@ import xml.etree.ElementTree as ET
 __help__ = """
 Module to parse and create an ebook using the epub module. 
 * You will need a text file in utf-8 to generate the epub.
-* Some fashion can be done. For instance _text_ in 
-  the .txt file will display "text" in italic
-* By default, paragraph are separated by a blanck line. If more than 
-  one blanck line is used, then a bigskip will be displayed 
-  between the two paragraph.
+
+Allow us to create an object that we will try to convert into en epub. We must create the objet, then parse a xml file to fill in the properties of the book. 
+
+Basic example : 
+> book = book_epub.Book(title='Le Passeur', authors=['Lois Lowry'], lang='fr-FR', cover='le_passeur.jpg')
+> 
+> # the text file must be in utf-8
+> book.parseBook('le_passeur.xml')
+> book.make('epub/%s' % book.title)
+
+The XML must have the following properties : 
+_ The book and all its properties must be in a "<book></book>".
+_ Each paragraph is <par</par>
+_ each section start with <section>the section title</section>
+_ the paragraph can have one or more of the following options : 
+  * poem : italic style for poem and songs
+  * bigskip : ahead of the current paragraph, there will be an extra space
   
-To generate an epub, here is an example : 
-book = book_epub.Book(title='Lorem Ipsum', authors = ['test'], 
-                      lang = 'fr-FR', cover = 'cover.jpg')
-# the cover is facultative, like the others parameters, 
-# even if title and authors are quite recommended
+  To define the options : <par option="poem bigskip"> or <par option="poem">
+_ for italic text, braket the text with "<i></i>
+_ to define footnotes, use where you want the mark : "<footnote>the text of the footnote</footnote>". The footnote texts will appear at the end of the book.
 
-book.sections = book_epub.parseBook('lorem_ipsum.txt')
-book.make('epub/%s' % book.title)
+Basic Example of XML book : 
+<book>
+<section>Chapter 1</section>
+<par>Lorem ipsum blabla bla.</par>
 
-# Note that if you want to skip a preamble, you must specify 
-# the line of the beginning of the first chapter
-# book.sections = ez_epub.parseBook('lorem_ipsum.txt', startLineNum=start_line)
+<par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
+anything though.</footnote>
+</par>
+</book>
+  
 
 /!\ Warning
 A sub folder 'templates' with the templates must exists
@@ -210,6 +224,7 @@ class Book:
         section.title = child.text
         sections.append(section)
       elif (tag == 'par'):
+        id_tail = 0
         texts = [text for text in child.itertext()]
         
         for grandchild in child._children:
@@ -227,7 +242,8 @@ class Book:
             texts[id_text] = '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote)
           elif (grandchild.tag == 'br'):
             try:
-              id_tail = texts.index(grandchild.tail)
+              # In some cases, for short tail texts, several occurences can appear in the list. The following line is here to prevent such misplacements of "<br />"
+              id_tail = id_tail + texts[id_tail:].index(grandchild.tail)
               texts.insert(id_tail, '<br />')
             except:
               print("Warning: Apparently two tag seems to be one next to each other, this make the parser bug.")
@@ -291,37 +307,4 @@ class Book:
       self.epub.checkEpub(EPUBCHECK, outputFile)
     else:
       print("Unable to find Epubcheck, .epub not checked")
-
-def formatParagraph(paragraph):
-  # We want utf8 encoding
-  paragraph = paragraph.encode('utf-8')
-  
-  # Search and replace for given characters
-  paragraph = paragraph.replace('--', '–')
-  
-  # Search for patterns. In xml, we define the name of the span class 
-  # we want to invoke, span.em for instance, if <em>
-  paragraph = re.sub(r' +', ' ', paragraph)
-  paragraph = re.sub(r'_(.+?)_', r'<em>\1</em>', paragraph)
-  return segmentParagraph(paragraph)
-
-def segmentParagraph(paragraph):
-  # Will search for xml environments such as <em> </em> and mark the 
-  # given selection to be inside a span html environment with 
-  # the specified class ('em' for the example)
-  segments = []
-  textStart = 0
-  style = []
-  for match in re.finditer(r'<(/?)([^>]+)>', paragraph):
-    if match.start() > textStart:
-      segments.append((paragraph[textStart : match.start()].decode('utf-8'), ' '.join(style)))
-    if match.group(1) == '':
-      style.append(match.group(2))
-    else:
-      style.remove(match.group(2))
-    textStart = match.end()
-  if textStart < len(paragraph):
-    segments.append((paragraph[textStart :].decode('utf-8'), ' '.join(style)))
-  return segments
-  
 
