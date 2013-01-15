@@ -224,30 +224,7 @@ class Book:
         section.title = child.text
         sections.append(section)
       elif (tag == 'par'):
-        id_tail = 0
-        texts = [text for text in child.itertext()]
-        
-        for grandchild in child._children:
-          if (grandchild.text != None):
-            id_text = texts.index(grandchild.text)
-          
-          
-          if (grandchild.tag == 'i'):
-            texts[id_text] = '<span class="italic">%s</span>' % texts[id_text]
-          elif (grandchild.tag == 'footnote'):
-            footnote.append(texts[id_text])
-            nb_footnote = len(footnote)
-            footnote_ref_tmp = "%s.html#footnotebackref_%d" % (section.filename, nb_footnote)
-            footnote_ref.append(footnote_ref_tmp)
-            texts[id_text] = '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote)
-          elif (grandchild.tag == 'br'):
-            try:
-              # In some cases, for short tail texts, several occurences can appear in the list. The following line is here to prevent such misplacements of "<br />"
-              id_tail = id_tail + texts[id_tail:].index(grandchild.tail)
-              texts.insert(id_tail, '<br />')
-            except:
-              print("Warning: Apparently two tag seems to be one next to each other, this make the parser bug.")
-              pdb.set_trace()
+        text = parseParagraph(child, section, footnote, footnote_ref)
         
         tmp = '<p>'
         styles = []
@@ -263,7 +240,7 @@ class Book:
           if styles:
             tmp = '<p class="%s">' % " ".join(styles)
             
-        tmp += "%s</p>\n" % " ".join(texts)
+        tmp += "%s</p>\n" % text
         section.text.append(tmp)
     
     if (len(footnote) != 0):
@@ -308,3 +285,35 @@ class Book:
     else:
       print("Unable to find Epubcheck, .epub not checked")
 
+
+def parseParagraph(paragraph, section, footnote, footnote_ref):
+  id_tail = 0
+  texts = [text for text in paragraph.itertext()]
+  
+  for grandchild in paragraph._children:
+    if (grandchild.text != None):
+      id_text = texts.index(grandchild.text)
+    
+    
+    if (grandchild.tag == 'i'):
+      texts[id_text] = '<span class="italic">%s</span>' % texts[id_text]
+    elif (grandchild.tag == 'footnote'):
+      footnotetext = parseParagraph(grandchild, section, footnote, footnote_ref)
+      # from the parent list we delete the texts corresponding to the footnote
+      for text in grandchild.itertext():
+        del(texts[id_text])
+        
+      footnote.append(footnotetext)
+      nb_footnote = len(footnote)
+      footnote_ref_tmp = "%s.html#footnotebackref_%d" % (section.filename, nb_footnote)
+      footnote_ref.append(footnote_ref_tmp)
+      texts.insert(id_text, '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote))
+    elif (grandchild.tag == 'br'):
+      try:
+        # In some cases, for short tail texts, several occurences can appear in the list. The following line is here to prevent such misplacements of "<br />"
+        id_tail = id_tail + texts[id_tail:].index(grandchild.tail)
+        texts.insert(id_tail, '<br />')
+      except:
+        print("Warning: Apparently two tag seems to be one next to each other, this make the parser bug.")
+        pdb.set_trace()
+  return " ".join(texts)
