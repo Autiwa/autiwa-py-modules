@@ -34,7 +34,7 @@ _ The book and all its properties must be in a "<book></book>".
 _ Each paragraph is <par</par>
 _ each section start with <section>the section title</section>
 _ the paragraph can have one or more of the following options : 
-  * poem : italic style for poem and songs
+  * poem : italic style for poem and songs (separate lines with '<br />')
   * bigskip : ahead of the current paragraph, there will be an extra space
   
   To define the options : <par option="poem bigskip"> or <par option="poem">
@@ -82,15 +82,7 @@ class Section:
   def __init__(self, title='', filename="default"):
     """
     
-    variables : 
-    text : an array constitued of the following 
-           element : ('paragraph', 'class'). The first element is the text of a 
-           given paragraph. The second element of the tuple is the 'class' 
-           associated with the paragraph. Each element will be a <p></p> 
-           html element, and, if different from '', the class will be the 
-           class of a <span></span> element, surrounding the paragraph.
-           'class' can be empty, if regular paragraph, or a sequence of class
-           separated by space
+    Object used to store a section. The main important variable is text, that contain a list of text, already as html rendering. When you define the section you must parse your text to apply html rendering.
            """
     
     Section.section_id += 1
@@ -224,30 +216,7 @@ class Book:
         section.title = child.text
         sections.append(section)
       elif (tag == 'par'):
-        id_tail = 0
-        texts = [text for text in child.itertext()]
-        
-        for grandchild in child._children:
-          if (grandchild.text != None):
-            id_text = texts.index(grandchild.text)
-          
-          
-          if (grandchild.tag == 'i'):
-            texts[id_text] = '<span class="italic">%s</span>' % texts[id_text]
-          elif (grandchild.tag == 'footnote'):
-            footnote.append(texts[id_text])
-            nb_footnote = len(footnote)
-            footnote_ref_tmp = "%s.html#footnotebackref_%d" % (section.filename, nb_footnote)
-            footnote_ref.append(footnote_ref_tmp)
-            texts[id_text] = '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote)
-          elif (grandchild.tag == 'br'):
-            try:
-              # In some cases, for short tail texts, several occurences can appear in the list. The following line is here to prevent such misplacements of "<br />"
-              id_tail = id_tail + texts[id_tail:].index(grandchild.tail)
-              texts.insert(id_tail, '<br />')
-            except:
-              print("Warning: Apparently two tag seems to be one next to each other, this make the parser bug.")
-              pdb.set_trace()
+        text = parseParagraph(child, section, footnote, footnote_ref)
         
         tmp = '<p>'
         styles = []
@@ -263,7 +232,7 @@ class Book:
           if styles:
             tmp = '<p class="%s">' % " ".join(styles)
             
-        tmp += "%s</p>\n" % " ".join(texts)
+        tmp += "%s</p>\n" % text
         section.text.append(tmp)
     
     if (len(footnote) != 0):
@@ -308,3 +277,51 @@ class Book:
     else:
       print("Unable to find Epubcheck, .epub not checked")
 
+
+def parseParagraph(paragraph, section, footnote, footnote_ref):
+  id_tail = 0
+  texts = [text for text in paragraph.itertext()]
+  
+  for (index, grandchild) in enumerate(paragraph._children):
+    if (grandchild.text != None):
+      id_text = texts.index(grandchild.text)
+    
+    
+    if (grandchild.tag == 'i'):
+      text = parseParagraph(grandchild, section, footnote, footnote_ref)
+      # from the parent list we delete the texts corresponding to the footnote
+      for text in grandchild.itertext():
+        del(texts[id_text])
+      
+      texts.insert(id_text, '<span class="italic">%s</span>' % text)
+    elif (grandchild.tag == 'b'):
+      text = parseParagraph(grandchild, section, footnote, footnote_ref)
+      # from the parent list we delete the texts corresponding to the footnote
+      for text in grandchild.itertext():
+        del(texts[id_text])
+      
+      texts.insert(id_text, '<span class="bold">%s</span>' % text)
+    elif (grandchild.tag == 'footnote'):
+      footnotetext = parseParagraph(grandchild, section, footnote, footnote_ref)
+      # from the parent list we delete the texts corresponding to the footnote
+      for text in grandchild.itertext():
+        del(texts[id_text])
+        
+      footnote.append(footnotetext)
+      nb_footnote = len(footnote)
+      footnote_ref_tmp = "%s.html#footnotebackref_%d" % (section.filename, nb_footnote)
+      footnote_ref.append(footnote_ref_tmp)
+      texts.insert(id_text, '<a id="footnotebackref_%d"></a><a href="footnote.html#footnote_%d">[%d]</a>' % (nb_footnote, nb_footnote, nb_footnote))
+    elif (grandchild.tag == 'br'):
+      tail = None
+      idx = index
+      while (tail in [None, '']):
+        tail = paragraph._children[idx].tail
+        idx += 1
+      id_tail = id_tail + texts[id_tail:].index(tail)
+      texts.insert(id_tail, '<br />')
+    else:
+      print("Warning: Unknown tag in a '<par>' paragraph.")
+      print("grandchild: "+str(grandchild))
+      pdb.set_trace()
+  return " ".join(texts)

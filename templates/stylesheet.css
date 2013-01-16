@@ -27,6 +27,10 @@ p {
   font-style:italic;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 p.noindent {
   text-indent: 0%
 }
