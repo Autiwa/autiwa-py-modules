@@ -247,7 +247,12 @@ class Book:
         tmp += '\n\n<br /><br /><a id="footnote_%d"></a><a href="%s">[%d]</a> %s' % (nb+1, ref, nb+1, footnote_text)
       tmp = "<p>%s</p>\n" % tmp
       section.text.append(tmp)
-
+    
+    # We apply automatic formatting
+    for (i, section) in enumerate(sections):
+      sections[i].text = automaticSearchAndReplace(section.text)
+    
+    
     self.setSections(sections)
 
   
@@ -325,3 +330,15 @@ def parseParagraph(paragraph, section, footnote, footnote_ref):
       print("grandchild: "+str(grandchild))
       pdb.set_trace()
   return " ".join(texts)
+
+def automaticSearchAndReplace(strings):
+  """to replace automatically some characters in strings of the list given in parameters"""
+  
+  for paragraph in strings:
+    paragraph = paragraph.replace('--', u'–')
+    paragraph = paragraph.replace('---', u'—')
+    
+    # Search for patterns. 
+    paragraph = re.sub(r' +', ' ', paragraph) # delete multi spaces
+
+  return strings
