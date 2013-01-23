@@ -1118,7 +1118,7 @@ class Disk(object):
   
   TORQUE_TYPES = ['real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual']
   
-  OPACITY_TYPES = ['bell', 'zhu']
+  OPACITY_TYPES = ['bell', 'zhu', 'chambers']
   
   BOUNDARIES = ["open", "closed"]
   
