@@ -46,6 +46,8 @@ Basic Example of XML book :
 <section>Chapter 1</section>
 <par>Lorem ipsum blabla bla.</par>
 
+<vspace />
+
 <par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
 anything though.</footnote>
 </par>
@@ -119,11 +121,14 @@ class Book:
     To define the options : <par option="poem bigskip"> or <par option="poem">
   _ for italic text, braket the text with "<i></i>
   _ to define footnotes, use where you want the mark : "<footnote>the text of the footnote</footnote>". The footnote texts will appear at the end of the book.
+  _define a vspace through <vspace /> (in place of a paragraph
   
   Basic Example of XML book : 
   <book>
   <section>Chapter 1</section>
   <par>Lorem ipsum blabla bla.</par>
+  
+  <vspace />
   
   <par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
   anything though.</footnote>
@@ -234,6 +239,14 @@ class Book:
             
         tmp += "%s</p>\n" % text
         section.text.append(tmp)
+      
+      elif (tag == 'vspace'):
+        tmp = '<p class="vspace">* * *</p>'
+        section.text.append(tmp)
+        
+      else:
+        print("unknown tag. We are not in a paragraph '<par>' but this is not a section either '<section>'")
+        pdb.set_trace()
     
     if (len(footnote) != 0):
       section = Section()
