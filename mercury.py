@@ -1118,6 +1118,8 @@ class Disk(object):
   
   TORQUE_TYPES = ['real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual']
   
+  OPACITY_TYPES = ['bell', 'zhu', 'chambers']
+  
   BOUNDARIES = ["open", "closed"]
   
   DISK_START = "! ------------------------------------------------\n" + \
@@ -1148,6 +1150,9 @@ class Disk(object):
                                     "! the inner edge where the surface density is damped so\n" + \
                                     "! that the surface density at the inner edge will be 0",
             'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
+            'opacity_type':"! %s define the torque type.\n" % OPACITY_TYPES +\
+                          "! bell : from bell & lin 1994\n" +\
+                          "! zhu : From zhu & hartmann 2009",
             'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
             'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. \n" +\
                                 "! If not specified, an auto value, based on the value of the viscosity is used.",
@@ -1184,7 +1189,7 @@ class Disk(object):
   
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
-               dissipation_time_switch=None, is_irradiation=None, 
+               dissipation_time_switch=None, is_irradiation=None, opacity_type=None,
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
                torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
                mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1225,6 +1230,12 @@ class Disk(object):
     
     if (viscosity != None):
       self.disk_parameter['viscosity'] = viscosity
+    
+    if (opacity_type != None):
+      if (opacity_type in Disk.OPACITY_TYPES):
+        self.disk_parameter['opacity_type'] = opacity_type
+      else:
+        raise NameError("'opacity_type' does not correspond to an existing type : '%s'.\nAvailable opacity_type types : %s" % (opacity_type, Disk.OPACITY_TYPES))
     
     if (is_turbulence != None):
       self.disk_parameter['is_turbulence'] = int(is_turbulence)
