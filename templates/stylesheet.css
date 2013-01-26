@@ -44,7 +44,7 @@ p.noindent {
 p.poem {
   font-style:italic;
   text-indent: 0%;
-  margin-left: 10%;
+  margin-left: 2em;
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
