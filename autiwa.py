@@ -125,14 +125,18 @@ class Temps(object):
       str_temps += str(self.nb_an)+"an "
     elif (self.nb_an > 1):
       str_temps += str(self.nb_an)+"ans "
+      
     if (self.nb_jour == 1):
       str_temps += str(self.nb_jour)+"jour "
     elif (self.nb_jour > 1):
       str_temps += str(self.nb_jour)+"jours "
+      
     if (self.nb_heure != 0):
       str_temps += str(self.nb_heure)+"h "
+      
     if (self.nb_minute != 0):
       str_temps += str(self.nb_minute)+"min "
+      
     str_temps += str(self.nb_seconde)+"s"
     return str_temps
   
