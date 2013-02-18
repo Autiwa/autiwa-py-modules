@@ -18,7 +18,7 @@ class Body(AutiwaObject):
   """
   class that define a planet and his characteristics. This is a meta class, used by BodyAst, BodyCom and BodyCart
   
-  Optional arameters common to all types of bodies:
+  Optional parameters common to all types of bodies:
   m = X    where X is a real number, to indicate the body's mass in
       Solar masses. If you don't specify a value the mass is
       assumed to be 0.
@@ -1118,7 +1118,7 @@ class Disk(object):
   
   TORQUE_TYPES = ['real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual']
   
-  OPACITY_TYPES = ['bell', 'zhu', 'chambers']
+  OPACITY_TYPES = ['bell', 'zhu', 'chambers', 'hure']
   
   BOUNDARIES = ["open", "closed"]
   
@@ -1152,6 +1152,8 @@ class Disk(object):
             'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
             'opacity_type':"! %s define the torque type.\n" % OPACITY_TYPES +\
                           "! bell : from bell & lin 1994\n" +\
+                          "! chambers : from chambers 2009\n" +\
+                          "! hure : opacity table from (hure, 2000)\n" + \
                           "! zhu : From zhu & hartmann 2009",
             'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
             'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. \n" +\
