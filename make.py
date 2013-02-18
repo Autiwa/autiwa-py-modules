@@ -261,7 +261,11 @@ class sourceFile(object):
   
   COMPILATOR = "gfortran"
   OPTIONS = "-O3 -march=native"
-  DEBUG = "-fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic"
+  #~ DEBUG = "-fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic"
+  DEBUG = "-pedantic -errors -Wall -Wconversion \
+  -Wunderflow -Wextra -Wunreachable-code \
+  -ffpe-trap=invalid,zero,overflow,underflow -g3 -fbounds-check -O0 \
+  -fstack-protector-all -fno-automatic -Wuninitialized -ftrapv"
   GDB = "-g"
   
   
