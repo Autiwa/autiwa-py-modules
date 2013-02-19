@@ -261,7 +261,11 @@ class sourceFile(object):
   
   COMPILATOR = "gfortran"
   OPTIONS = "-O3 -march=native"
-  DEBUG = "-fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic"
+  #~ DEBUG = "-fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic"
+  DEBUG = "-pedantic -errors -Wall -Wconversion \
+  -Wunderflow -Wextra -Wunreachable-code \
+  -ffpe-trap=invalid,zero,overflow,underflow -g3 -fbounds-check -O0 \
+  -fstack-protector-all -fno-automatic -Wuninitialized -ftrapv"
   GDB = "-g"
   
   
@@ -290,11 +294,24 @@ class sourceFile(object):
     else:
       self.name = str(name)
     
-    self.isCompiled = False
+    
     
     # By default, nothing is a program
     self.isProgram = isProgram
     
+    
+    self.isCompiled = False
+    
+    if (not(self.isProgram)):
+      # If the source file is newer than the object file, we need to compile it
+      object_file = "%s.o" % self.name
+      if (os.path.isfile(object_file) and os.path.isfile("%s.mod" % self.name)):
+        self.toBeCompiled = os.path.getmtime(self.filename) > os.path.getmtime(object_file)
+      else:
+        # If the object file do not exist
+        self.toBeCompiled = True
+    else:
+      self.toBeCompiled = True # We always compile the programs
     
     (self.defined, self.used, self.included) = self.__getModules()
     
@@ -611,62 +628,69 @@ class sourceFile(object):
       
       # For each object, we compile it if it's not already the case.
       for source in module_sources:
+        # We must launch source.compile() even if the file will not be compilated, just to get the right dependencies.
         if not(source.isCompiled):
           # the list() is here to ensure not to have a pointer and share the list. If not, the list of parent_dependencies will 
           # not be correct and contains all the previous parent dependencies. 
           source.compile(list(parent_dependencies)) 
           
+          # We compile the current file if any of the dependencies has been effectively compiled
+          if source.toBeCompiled:
+            self.toBeCompiled = True
+          
       # We complete the dependencies list now that all used modules
       # have been compiled, they must have a complete list of 
       # their own dependencies.
       for source in module_sources:
-        for dep in source.dependencies:
-          self.dependencies.append(dep)
-              
+        self.dependencies.extend(source.dependencies)
+        
       # We delete all dependencies that are present several number of times.
       self.dependencies = list(set(self.dependencies))
       
-      # Now that all the dependencies have been compiled, we compile 
-      # the current source file.
-      options = sourceFile.OPTIONS
-      if (sourceFile.isDebug):
-        options += " "+sourceFile.DEBUG
-      
-      if (sourceFile.isGDB or sourceFile.isProfiling):
-        options += " "+sourceFile.GDB
-      
-      if (sourceFile.isProfiling):
-        # We deactivate all other options except GDB => not True anymore
-        options += " "+" -pg"
+      if self.toBeCompiled:
+        # Now that all the dependencies have been compiled, we compile 
+        # the current source file.
+        options = sourceFile.OPTIONS
+        if (sourceFile.isDebug):
+          options += " "+sourceFile.DEBUG
         
-      if not(self.isProgram):
-        commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
-      else:
-        commande = sourceFile.COMPILATOR+" "+options+" -o "+self.name+" "+self.filename+" "+" ".join(self.dependencies)
-        print(commande)
-      
-      process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        if (sourceFile.isGDB or sourceFile.isProfiling):
+          options += " "+sourceFile.GDB
+        
+        if (sourceFile.isProfiling):
+          # We deactivate all other options except GDB => not True anymore
+          options += " "+" -pg"
+          
+        if not(self.isProgram):
+          commande = sourceFile.COMPILATOR+" "+options+" -c "+self.filename
+        else:
+          commande = sourceFile.COMPILATOR+" "+options+" -o "+self.name+" "+self.filename+" "+" ".join(self.dependencies)
+          print(commande)
+        
+        process = subprocess.Popen(commande, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-      (process_stdout, process_stderr) = process.communicate()
+        (process_stdout, process_stderr) = process.communicate()
+        
+        print("Compiling "+self.filename+"...")
+        returnCode = process.poll()
       
-      print("Compiling "+self.filename+"...")
-      returnCode = process.poll()
+        self.isCompiled = True
       
+        # If returnCode is not 0, then there was a problem
+        if (returnCode==0):
+          return process_stderr
+        else:        
+          logname = "compiling_"+self.filename+".log"
+
+          # We write compilation errors in the following file.
+          f = open(logname,'w')
+          f.write(process_stderr)
+          f.close()
+          
+          print("Compilation error, see '"+logname+"'")
+          sys.exit(1)
+        
       self.isCompiled = True
-      
-      # If returnCode is not 0, then there was a problem
-      if (returnCode==0):
-        return process_stderr
-      else:        
-        logname = "compiling_"+self.filename+".log"
-
-        # We write compilation errors in the following file.
-        f = open(logname,'w')
-        f.write(process_stderr)
-        f.close()
-        
-        print("Compilation error, see '"+logname+"'")
-        sys.exit(1)
       
   def __str__(self):
     """overload the str method. As a consequence, you can print the object via print name_instance

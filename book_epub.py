@@ -46,6 +46,8 @@ Basic Example of XML book :
 <section>Chapter 1</section>
 <par>Lorem ipsum blabla bla.</par>
 
+<vspace />
+
 <par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
 anything though.</footnote>
 </par>
@@ -119,11 +121,14 @@ class Book:
     To define the options : <par option="poem bigskip"> or <par option="poem">
   _ for italic text, braket the text with "<i></i>
   _ to define footnotes, use where you want the mark : "<footnote>the text of the footnote</footnote>". The footnote texts will appear at the end of the book.
+  _define a vspace through <vspace /> (in place of a paragraph
   
   Basic Example of XML book : 
   <book>
   <section>Chapter 1</section>
   <par>Lorem ipsum blabla bla.</par>
+  
+  <vspace />
   
   <par> Paragraph 2, <i>blabla</i>. But trhoi<footnote>Does not mean 
   anything though.</footnote>
@@ -234,6 +239,14 @@ class Book:
             
         tmp += "%s</p>\n" % text
         section.text.append(tmp)
+      
+      elif (tag == 'vspace'):
+        tmp = '<p class="vspace">* * *</p>'
+        section.text.append(tmp)
+        
+      else:
+        print("unknown tag. We are not in a paragraph '<par>' but this is not a section either '<section>'")
+        pdb.set_trace()
     
     if (len(footnote) != 0):
       section = Section()
@@ -247,7 +260,12 @@ class Book:
         tmp += '\n\n<br /><br /><a id="footnote_%d"></a><a href="%s">[%d]</a> %s' % (nb+1, ref, nb+1, footnote_text)
       tmp = "<p>%s</p>\n" % tmp
       section.text.append(tmp)
-
+    
+    # We apply automatic formatting
+    for (i, section) in enumerate(sections):
+      sections[i].text = automaticSearchAndReplace(section.text)
+    
+    
     self.setSections(sections)
 
   
@@ -325,3 +343,15 @@ def parseParagraph(paragraph, section, footnote, footnote_ref):
       print("grandchild: "+str(grandchild))
       pdb.set_trace()
   return " ".join(texts)
+
+def automaticSearchAndReplace(strings):
+  """to replace automatically some characters in strings of the list given in parameters"""
+  
+  for paragraph in strings:
+    paragraph = paragraph.replace('--', u'–')
+    paragraph = paragraph.replace('---', u'—')
+    
+    # Search for patterns. 
+    paragraph = re.sub(r' +', ' ', paragraph) # delete multi spaces
+
+  return strings

@@ -5,33 +5,32 @@
   <style type="text/css">
 .title, .authors {
   text-align: center;
+  margin-top: 2em;
+  margin-bottom: 2em;
 }
 
 .title {
-  font-style: bold;
-  text-transform:capitalize;
-  margin-top: 200px;
+  font-style: italic; 
+  font-weight: bold;
+  font-size: 2em;
   border: 2px solid #000000;
   padding: 0.3em;
 }
 
-.authors {
-  font-style: italic;
-  font-variant: small-caps;
-}
-
 span.author {
-  margin: 1em;
+  font-size: 1.66667em;
+  font-style: italic;
 }
   </style>
 </head>
 <body>
-  <h1 class="title">${book.title}</h1>
-  <h3 class="authors">
+    <p class="authors">
   <py:for each="creator, _ in book.creators">
   <span class="author">$creator</span>
   </py:for>
-  </h3>
+  </p>
+  <p class="title">${book.title}</p>
+
 
   
 </body>
