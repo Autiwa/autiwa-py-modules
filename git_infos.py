@@ -78,7 +78,7 @@ def list_tag(commit):
   
   return tags 
 
-def write_infos_in_f90_file():
+def write_infos_in_f90_file(main_branch='master'):
   """This function will create a fortran file that will store, as variable, some infos about a git repository"""
   
   F90_BEGIN = "module git_infos\n" + \
@@ -93,7 +93,7 @@ def write_infos_in_f90_file():
   isModifs = is_non_committed_modifs()
   tags = list_tag(commit)
   
-  if (branch != 'master'):
+  if (branch != main_branch):
     print("Warning: The current branch is %s" % branch)
   
   f90source = open("git_infos.f90", 'w')
