@@ -485,7 +485,7 @@ def setParameter(parameter, nb_planets):
     return output_parameters
   elif (type(parameter) == list):
     # We assume in this case that we specified explicitely the values for all the planet and do not change anything.
-    return parameter
+    return parameter[0:nb_planets]
   elif (type(parameter) == tuple):
     output_parameters = []
     if (type(parameter[0]) == list):
