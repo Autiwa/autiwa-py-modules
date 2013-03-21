@@ -1120,6 +1120,8 @@ class Disk(object):
   
   OPACITY_TYPES = ['bell', 'zhu', 'chambers', 'hure']
   
+  VISCOSITY_TYPES = ['constant', 'alpha']
+  
   BOUNDARIES = ["open", "closed"]
   
   DISK_START = "! ------------------------------------------------\n" + \
@@ -1149,6 +1151,9 @@ class Disk(object):
             'inner_smoothing_width':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
                                     "! the inner edge where the surface density is damped so\n" + \
                                     "! that the surface density at the inner edge will be 0",
+            'viscosity_type':"! %s define the viscosity\n" % VISCOSITY_TYPES +\
+                             "! constant : constant viscosity (being defined with the 'viscosity' parameter\n"+\
+                             "! alpha : alpha prescription, (alpha being defined with the 'alpha' parameter", 
             'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
             'opacity_type':"! %s define the torque type.\n" % OPACITY_TYPES +\
                           "! bell : from bell & lin 1994\n" +\
@@ -1189,7 +1194,8 @@ class Disk(object):
             'mass_dep_cz_m_max':"! position of the convergence zone for the top mass ('mass_dependant' case)"}
   
   
-  def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, viscosity=None, 
+  def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, 
+               viscosity_type=None, viscosity=None, alpha=None,
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
                dissipation_time_switch=None, is_irradiation=None, opacity_type=None,
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
@@ -1230,8 +1236,17 @@ class Disk(object):
     if (dissipation_time_switch != None):
       self.disk_parameter['dissipation_time_switch'] = dissipation_time_switch
     
+    if (viscosity_type != None):
+      if (viscosity_type in Disk.VISCOSITY_TYPES):
+        self.disk_parameter['viscosity_type'] = viscosity_type
+      else:
+        raise NameError("'viscosity_type' does not correspond to an existing type : '%s'.\nAvailable viscosity_type types : %s" % (viscosity_type, Disk.VISCOSITY_TYPES))
+    
     if (viscosity != None):
       self.disk_parameter['viscosity'] = viscosity
+      
+    if (alpha != None):
+      self.disk_parameter['alpha'] = alpha
     
     if (opacity_type != None):
       if (opacity_type in Disk.OPACITY_TYPES):
