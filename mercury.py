@@ -1124,75 +1124,105 @@ class Disk(object):
   
   BOUNDARIES = ["open", "closed"]
   
-  DISK_START = "! ------------------------------------------------\n" + \
-          "! Parameter file for various properties of the disk. \n" + \
-          "! ------------------------------------------------\n" + \
-          "! blanck line or with spaces will be skipped. \n" + \
-          "! In fact, the only lines that matter are non commented lines with a\n" + \
-          "! '=' character to distinguish the identificator and the value(s)\n" + \
-          "! (each value must be separated with at least one space. \n" + \
-          "! Line must not be longer than 80 character, but comments can be far\n" + \
-          "! bigger than that, even on line with a parameter to read.\n\n"
+  DISK_START = "!# ------------------------------------------------\n" + \
+          "!# Parameter file for various properties of the disk. \n" + \
+          "!# ------------------------------------------------\n" + \
+          "!# blanck line or with spaces will be skipped. \n" + \
+          "!# In fact, the only lines that matter are non commented lines with a\n" + \
+          "!# '=' character to distinguish the identificator and the value(s)\n" + \
+          "!# (each value must be separated with at least one space. \n" + \
+          "!# Line must not be longer than 80 character, but comments can be far\n" + \
+          "!# bigger than that, even on line with a parameter to read.\n\n"
   
-  DISK_COMMENT = {'b/h':"! the smoothing length for the planet's potential", 
-            'adiabatic_index':"! the adiabatic index for the gas equation of state", 
-            'mean_molecular_weight':"! the mean molecular weight in mass of a proton", 
-            'surface_density':"! Here we define the power law for surface density \n" +\
-                                "!  sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
-                                "!  where sigma_0 is the surface density at (R=1AU) [g/cm^2] and sigma_index\n" +\
-                                "!  is the negative slope of the surface density power law (alpha in the paper)\n" +\
-                                "! If 'manual' is specified, then the surface density profile will instead be\n" +\
-                                "!  read from 'surface_density_profile.dat', two columns, the first being \n" +\
-                                "!  orbital distance and the second the surface density in g/cm^2", 
-            'is_irradiation':"! (0, False) if there is no stellar irradiation to compute temperature profile\n" + \
+  DISK_COMMENT = {'b/h':"!# the smoothing length for the planet's potential", 
+            'adiabatic_index':"!# the adiabatic index for the gas equation of state", 
+            'mean_molecular_weight':"!# the mean molecular weight in mass of a proton", 
+            'surface_density':"!# Here we define the power law for surface density \n" +\
+                                "!#  sigma(R) = sigma_0 * R^(-sigma_index) \n" + \
+                                "!#  where sigma_0 is the surface density at (R=1AU) [g/cm^2] and sigma_index\n" +\
+                                "!#  is the negative slope of the surface density power law (alpha in the paper)\n" +\
+                                "!# If 'manual' is specified, then the surface density profile will instead be\n" +\
+                                "!#  read from 'surface_density_profile.dat', two columns, the first being \n" +\
+                                "!#  orbital distance and the second the surface density in g/cm^2", 
+            'is_irradiation':"!# (0, False) if there is no stellar irradiation to compute temperature profile\n" + \
                              "!, (1, True) if there is stellar irradiation", 
-            'disk_edges':"! Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
-                         "! (used for temperature profile for instance)", 
-            'inner_smoothing_width':"! The width (in unit of the inner boundary radius) of the region right after\n" + \
-                                    "! the inner edge where the surface density is damped so\n" + \
-                                    "! that the surface density at the inner edge will be 0",
-            'viscosity_type':"! %s define the viscosity\n" % VISCOSITY_TYPES +\
-                             "! constant : constant viscosity (being defined with the 'viscosity' parameter\n"+\
-                             "! alpha : alpha prescription, (alpha being defined with the 'alpha' parameter", 
-            'viscosity':"! Constant viscosity of the disk [cm^2/s]", 
-            'opacity_type':"! %s define the torque type.\n" % OPACITY_TYPES +\
-                          "! bell : from bell & lin 1994\n" +\
-                          "! chambers : from chambers 2009\n" +\
-                          "! hure : opacity table from (hure, 2000)\n" + \
-                          "! zhu : From zhu & hartmann 2009",
-            'is_turbulence':"! (0, False) if there is no turbulence, (1, True) if there is turbulence", 
-            'turbulent_forcing':"! The value of the adimensioned parameter that control the strength of the resonance. \n" +\
-                                "! If not specified, an auto value, based on the value of the viscosity is used.",
-            'dissipation_type':"! integer to tell if there is dissipation of the disk or not. \n" +\
-                                             "! 0 for no dissipation\n" +\
-                                             "! 1 for viscous dissipation\n" +\
-                                             "! 2 for exponential decay of the initial profile\n" +\
-                                             "! 3 for mixed exponential decay (viscous then photoevap)", 
-            'tau_viscous':"! (years) the exponential decay for the viscous phase (dissipation_type = 3)", 
-            'tau_photoevap':"! (years) exponential decay for photoevaporation phase (dissipation_type = 3)", 
+            'disk_edges':"!# Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
+                         "!# (used for temperature profile for instance)", 
+            'inner_smoothing_width':"!# The width (in unit of the inner boundary radius) of the region right after\n" + \
+                                    "!# the inner edge where the surface density is damped so\n" + \
+                                    "!# that the surface density at the inner edge will be 0",
+            'viscosity_type':"!# %s define the viscosity\n" % VISCOSITY_TYPES +\
+                             "!# constant : constant viscosity (being defined with the 'viscosity' parameter\n"+\
+                             "!# alpha : alpha prescription, (alpha being defined with the 'alpha' parameter", 
+            'viscosity':"!# Constant viscosity of the disk [cm^2/s]", 
+            'alpha':"!# Alpha value used for alpha prescription of the viscosity (adimensioned)",
+            'opacity_type':"!# %s define the torque type.\n" % OPACITY_TYPES +\
+                          "!# bell : from bell & lin 1994\n" +\
+                          "!# chambers : from chambers 2009\n" +\
+                          "!# hure : opacity table from (hure, 2000)\n" + \
+                          "!# zhu : From zhu & hartmann 2009",
+            'is_turbulence':"!# (0, False) if there is no turbulence, (1, True) if there is turbulence", 
+            'turbulent_forcing':"!# The value of the adimensioned parameter that control the strength of the resonance. \n" +\
+                                "!# If not specified, an auto value, based on the value of the viscosity is used.",
+            'dissipation_type':"!# integer to tell if there is dissipation of the disk or not. \n" +\
+                                             "!# 0 for no dissipation\n" +\
+                                             "!# (1) for viscous dissipation (Not implemented anymore)\n" +\
+                                             "!# 2 for exponential decay of the initial profile\n" +\
+                                             "!# 3 for mixed exponential decay (viscous then photoevap)", 
+            'tau_viscous':"!# (years) the exponential decay for the viscous phase (dissipation_type = 3)", 
+            'tau_photoevap':"!# (years) exponential decay for photoevaporation phase (dissipation_type = 3)", 
             'dissipation_time_switch':'! (years) the time when we switch from viscous to photoevap (dissipation_type = 3)',
             'disk_exponential_decay':'! Value of the exponential decay timescale for the dissipation of the disk\n' +\
                                      '! (only if dissipation_type = 2)',
-            'inner_boundary_condition':"! %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
-            'outer_boundary_condition':"! %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
-            'sample':"! number of point to the 1D radial grid of the disk"}
-  INTERACTIONS_COMMENT = {'torque_type':"! %s define the torque type.\n" % TORQUE_TYPES +\
-                          "! real : The torque from (pardekooper et al., 2011)\n" +\
-                          "! linear_indep : Mass independant convergence zone with a linear torque profile\n" +\
-                          "! tanh_indep : Mass independant convergence zone with a \n" +\
-                          "!              tanh torque profile that saturate at a given value\n" +\
-                          "! mass_dependant : Mass dependant convergence zone where for a \n" +\
-                          "!                  given mass the torque profile is linear with distance\n" +\
-                          "! manual : the code will read the file 'torque_profile.dat' that must contain 2\n" +\
-                          "! columns, the first being the semi major axis in AU, and the second the torque",
-            'torque_profile_steepness':"! Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
-            'saturation_torque':"! the assymptot for the arctan mass indep convergence zone", 
-            'indep_cz':"! The position of the convergence zone in the 'mass_independant' torque case", 
-            'mass_dep_m_min':"! lower mass for the 'mass_dependant' convergence zone", 
-            'mass_dep_m_max':"! top mass for the 'mass_dependant' convergence zone", 
-            'mass_dep_cz_m_min':"! position of the convergence zone for the lower mass ('mass_dependant' case)", 
-            'mass_dep_cz_m_max':"! position of the convergence zone for the top mass ('mass_dependant' case)"}
+            'inner_boundary_condition':"!# %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
+            'outer_boundary_condition':"!# %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
+            'sample':"!# number of point to the 1D radial grid of the disk"}
+  INTERACTIONS_COMMENT = {'torque_type':"!# %s define the torque type.\n" % TORQUE_TYPES +\
+                          "!# real : The torque from (pardekooper et al., 2011)\n" +\
+                          "!# linear_indep : Mass independant convergence zone with a linear torque profile\n" +\
+                          "!# tanh_indep : Mass independant convergence zone with a \n" +\
+                          "!#              tanh torque profile that saturate at a given value\n" +\
+                          "!# mass_dependant : Mass dependant convergence zone where for a \n" +\
+                          "!#                  given mass the torque profile is linear with distance\n" +\
+                          "!# manual : the code will read the file 'torque_profile.dat' that must contain 2\n" +\
+                          "!# columns, the first being the semi major axis in AU, and the second the torque",
+            'torque_profile_steepness':"!# Gamma = a * x + b. Here is the steeness 'a' of the linear torque profile, both mass-(in)dependant", 
+            'saturation_torque':"!# the assymptot for the arctan mass indep convergence zone", 
+            'indep_cz':"!# The position of the convergence zone in the 'mass_independant' torque case", 
+            'mass_dep_m_min':"!# lower mass for the 'mass_dependant' convergence zone", 
+            'mass_dep_m_max':"!# top mass for the 'mass_dependant' convergence zone", 
+            'mass_dep_cz_m_min':"!# position of the convergence zone for the lower mass ('mass_dependant' case)", 
+            'mass_dep_cz_m_max':"!# position of the convergence zone for the top mass ('mass_dependant' case)"}
   
+  DEFAULT = {'b/h':0.4, 
+          'adiabatic_index':1.4, 
+          'mean_molecular_weight':2.35, 
+          'surface_density':(500,0.5), 
+          'is_irradiation':1, 
+          'disk_edges':(0.1, 100.), 
+          'inner_smoothing_width':0.05,
+          'viscosity_type':'constant', 
+          'viscosity':1e15,
+          'alpha':1e-3,
+          'opacity_type':"hure",
+          'is_turbulence':0, 
+          'turbulent_forcing':1.3e-4,
+          'dissipation_type':0, 
+          'tau_viscous':1e7, 
+          'tau_photoevap':3e4, 
+          'dissipation_time_switch':2e6,
+          'disk_exponential_decay':1e6,
+          'inner_boundary_condition':"closed", 
+          'outer_boundary_condition':"closed",
+          'sample':400,
+          'torque_type':"real",
+          'torque_profile_steepness':1., 
+          'saturation_torque':1., 
+          'indep_cz':3.0, 
+          'mass_dep_m_min':1, 
+          'mass_dep_m_max':60, 
+          'mass_dep_cz_m_min':4, 
+          'mass_dep_cz_m_max':30}
   
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, 
                viscosity_type=None, viscosity=None, alpha=None,
@@ -1206,35 +1236,26 @@ class Disk(object):
     self.disk_parameter = {}
     self.interaction_parameter = {}
     
-    if (b_over_h != None):
-      self.disk_parameter['b/h'] = b_over_h
+    self.disk_parameter['b/h'] = b_over_h
     
-    if (adiabatic_index != None):
-      self.disk_parameter['adiabatic_index'] = adiabatic_index
+    self.disk_parameter['adiabatic_index'] = adiabatic_index
     
-    if (mean_molecular_weight != None):
-      self.disk_parameter['mean_molecular_weight'] = mean_molecular_weight
+    self.disk_parameter['mean_molecular_weight'] = mean_molecular_weight
     
-    if (surface_density != None):
-      self.disk_parameter['surface_density'] = surface_density
+    self.disk_parameter['surface_density'] = surface_density
     
     if (is_irradiation != None):
       self.disk_parameter['is_irradiation'] = int(is_irradiation)
+    else:
+      self.disk_parameter['is_irradiation'] = None
     
-    if (disk_edges != None):
-      self.disk_parameter['disk_edges'] = disk_edges
+    self.disk_parameter['disk_edges'] = disk_edges
     
-    if (inner_smoothing_width != None):
-      self.disk_parameter['inner_smoothing_width'] = inner_smoothing_width
+    self.disk_parameter['inner_smoothing_width'] = inner_smoothing_width
     
-    if (tau_viscous != None):
-      self.disk_parameter['tau_viscous'] = tau_viscous
-    
-    if (tau_photoevap != None):
-      self.disk_parameter['tau_photoevap'] = tau_photoevap
-    
-    if (dissipation_time_switch != None):
-      self.disk_parameter['dissipation_time_switch'] = dissipation_time_switch
+    self.disk_parameter['tau_viscous'] = tau_viscous
+    self.disk_parameter['tau_photoevap'] = tau_photoevap
+    self.disk_parameter['dissipation_time_switch'] = dissipation_time_switch
     
     if (viscosity_type != None):
       if (viscosity_type in Disk.VISCOSITY_TYPES):
@@ -1242,11 +1263,8 @@ class Disk(object):
       else:
         raise NameError("'viscosity_type' does not correspond to an existing type : '%s'.\nAvailable viscosity_type types : %s" % (viscosity_type, Disk.VISCOSITY_TYPES))
     
-    if (viscosity != None):
-      self.disk_parameter['viscosity'] = viscosity
-      
-    if (alpha != None):
-      self.disk_parameter['alpha'] = alpha
+    self.disk_parameter['viscosity'] = viscosity
+    self.disk_parameter['alpha'] = alpha
     
     if (opacity_type != None):
       if (opacity_type in Disk.OPACITY_TYPES):
@@ -1256,18 +1274,15 @@ class Disk(object):
     
     if (is_turbulence != None):
       self.disk_parameter['is_turbulence'] = int(is_turbulence)
-      
-    if (turbulent_forcing != None):
-      self.disk_parameter['turbulent_forcing'] = turbulent_forcing
+    else:
+      self.disk_parameter['is_turbulence'] = None
+    self.disk_parameter['turbulent_forcing'] = turbulent_forcing
     
-    if (sample != None):
-      self.disk_parameter['sample'] = sample
+    self.disk_parameter['sample'] = sample
     
-    if (dissipation_type != None):
-      self.disk_parameter['dissipation_type'] = dissipation_type
+    self.disk_parameter['dissipation_type'] = dissipation_type
     
-    if (disk_exponential_decay != None):
-      self.disk_parameter['disk_exponential_decay'] = disk_exponential_decay
+    self.disk_parameter['disk_exponential_decay'] = disk_exponential_decay
     
     if (inner_boundary_condition != None):
       if (inner_boundary_condition in Disk.BOUNDARIES):
@@ -1291,28 +1306,74 @@ class Disk(object):
       else:
         raise NameError("'torque_type' does not correspond to an existing type : '%s'.\nAvailable torque types : %s" % (torque_type, Disk.TORQUE_TYPES))
       
-    if (torque_profile_steepness != None):
-      self.interaction_parameter['torque_profile_steepness'] = torque_profile_steepness
+    self.interaction_parameter['torque_profile_steepness'] = torque_profile_steepness
     
-    if (saturation_torque != None):
-      self.interaction_parameter['saturation_torque'] = saturation_torque
+    self.interaction_parameter['saturation_torque'] = saturation_torque
     
-    if (indep_cz != None):
-      self.interaction_parameter['indep_cz' ] = indep_cz 
+    self.interaction_parameter['indep_cz' ] = indep_cz 
     
-    if (mass_dep_m_min != None):
-      self.interaction_parameter['mass_dep_m_min' ] = mass_dep_m_min 
+    self.interaction_parameter['mass_dep_m_min' ] = mass_dep_m_min 
+    self.interaction_parameter['mass_dep_m_max' ] = mass_dep_m_max 
       
-    if (mass_dep_m_max != None):
-      self.interaction_parameter['mass_dep_m_max' ] = mass_dep_m_max 
-      
-    if (mass_dep_cz_m_min != None):
-      self.interaction_parameter['mass_dep_cz_m_min' ] = mass_dep_cz_m_min 
-      
-    if (mass_dep_cz_m_max != None):
-      self.interaction_parameter['mass_dep_cz_m_max' ] = mass_dep_cz_m_max 
+    self.interaction_parameter['mass_dep_cz_m_min' ] = mass_dep_cz_m_min 
+    self.interaction_parameter['mass_dep_cz_m_max' ] = mass_dep_cz_m_max 
     
     
+  def demo(self):
+    """will create and write a demo file"""
+    
+    self.disk_parameter['b/h'] = 0.4
+  
+    self.disk_parameter['adiabatic_index'] = 1.4
+  
+    self.disk_parameter['mean_molecular_weight'] = 2.35
+  
+    self.disk_parameter['surface_density'] = (500, 0.5)
+  
+    self.disk_parameter['is_irradiation'] = 1
+  
+    self.disk_parameter['disk_edges'] = (0.1, 100)
+  
+    self.disk_parameter['inner_smoothing_width'] = 0.05
+  
+    self.disk_parameter['tau_viscous'] = None
+    self.disk_parameter['tau_photoevap'] = None
+    self.disk_parameter['dissipation_time_switch'] = None
+  
+    self.disk_parameter['viscosity_type'] = 'constant'
+    self.disk_parameter['viscosity'] = 1e15
+    self.disk_parameter['alpha'] = None
+
+    self.disk_parameter['opacity_type'] = 'bell'
+    
+    self.disk_parameter['is_turbulence'] = 0
+    self.disk_parameter['turbulent_forcing'] = None
+  
+    self.disk_parameter['sample'] = 400
+  
+    self.disk_parameter['dissipation_type'] = 0
+  
+    self.disk_parameter['disk_exponential_decay'] = None
+  
+    self.disk_parameter['inner_boundary_condition'] = None
+    self.disk_parameter['outer_boundary_condition'] = None
+  
+  #####################################################################
+    self.interaction_parameter['torque_type'] = 'real'
+    
+    self.interaction_parameter['torque_profile_steepness'] = None
+  
+    self.interaction_parameter['saturation_torque'] = None
+  
+    self.interaction_parameter['indep_cz' ] = None
+  
+    self.interaction_parameter['mass_dep_m_min' ] = None
+    self.interaction_parameter['mass_dep_m_max' ] = None
+    
+    self.interaction_parameter['mass_dep_cz_m_min' ] = None
+    self.interaction_parameter['mass_dep_cz_m_max' ] = None 
+    
+    self.write()
   
   def write(self):
     """write all the data in a file named 'element.in' in the current working directory"""
@@ -1322,25 +1383,29 @@ class Disk(object):
     ## We write the header
     disk.write(Disk.DISK_START)
     
-    disk.write("*****************************\n")
-    disk.write("*      Disk Parameters      *\n")
-    disk.write("*****************************\n")
+    disk.write("!*****************************\n")
+    disk.write("!*      Disk Parameters      *\n")
+    disk.write("!*****************************\n")
     for (key, value) in sorted(self.disk_parameter.items()):
       disk.write("\n")
       disk.write(Disk.DISK_COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
       if (type(value) in (list, tuple)):
         disk.write(key+" = "+" ".join(map(str, value))+"\n")
+      elif (value == None):
+        disk.write("!%s = %s\n" % (key, Disk.DEFAULT[key]))
       else:
         disk.write(key+" = "+str(value)+"\n")
     
-    disk.write("*****************************\n")
-    disk.write("* Interactions disk/planets *\n")
-    disk.write("*****************************\n")
+    disk.write("!*****************************\n")
+    disk.write("!* Interactions disk/planets *\n")
+    disk.write("!*****************************\n")
     for (key, value) in sorted(self.interaction_parameter.items()):
       disk.write("\n")
       disk.write(Disk.INTERACTIONS_COMMENT[key]+"\n") # the comment character is directly in the COMMENT element because some elements might be multilines.
       if (type(value) in (list, tuple)):
         disk.write(key+" = "+" ".join(map(str, value))+"\n")
+      elif (value == None):
+        disk.write("!%s = %s\n" % (key, Disk.DEFAULT[key]))
       else:
         disk.write(key+" = "+str(value)+"\n")
     
