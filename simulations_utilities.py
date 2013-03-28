@@ -446,7 +446,7 @@ class SimpleJob(object):
     script.write(self.command)
     script.close()
 
-def setParameter(parameter, nb_planets):
+def setParameter(parameter, nb_planets, vmin=None, vmax=None):
   """This function will generate the parameters list given a tuple a values.. 
   
   Parameter : 
@@ -496,7 +496,15 @@ def setParameter(parameter, nb_planets):
       output_parameters.extend([significativeRound(uniform(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)])
       return output_parameters
     elif (parameter[2] == 'gaussian'):
-      output_parameters.extend([significativeRound(gauss(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS) for i in range(nb_planets)])
+      while (len(output_parameters) < nb_planets):
+        tmp_value = significativeRound(gauss(parameter[0], parameter[1]),SIGNIFICATIVE_NUMBERS)
+        
+        above_min_value  = ((vmin == None) or ((vmin != None) and (vmin < tmp_value)))
+        inside_max_value = ((vmax == None) or ((vmax != None) and (vmax > tmp_value)))
+        
+        if (above_min_value and inside_max_value):
+          output_parameters.append(tmp_value)
+        
       return output_parameters
   else:
     raise ValueError("The way you're trying to set the parameter doesn't seems to be implemented so far")
