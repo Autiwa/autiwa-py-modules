@@ -1120,7 +1120,7 @@ class Disk(object):
   
   OPACITY_TYPES = ['bell', 'zhu', 'chambers', 'hure']
   
-  VISCOSITY_TYPES = ['constant', 'alpha']
+  VISCOSITY_TYPES = ['constant', 'alpha', 'alpha_dz']
   
   BOUNDARIES = ["open", "closed"]
   
@@ -1156,6 +1156,8 @@ class Disk(object):
                              "!# alpha : alpha prescription, (alpha being defined with the 'alpha' parameter", 
             'viscosity':"!# Constant viscosity of the disk [cm^2/s]", 
             'alpha':"!# Alpha value used for alpha prescription of the viscosity (adimensioned)",
+            'alpha_dz':"!# the alpha value for the alpha-prescription in the 3 regions",
+            'radius_dz':"!# the two radius that separate the 3 different alpha-regions",
             'opacity_type':"!# %s define the torque type.\n" % OPACITY_TYPES +\
                           "!# bell : from bell & lin 1994\n" +\
                           "!# chambers : from chambers 2009\n" +\
@@ -1204,6 +1206,8 @@ class Disk(object):
           'viscosity_type':'constant', 
           'viscosity':1e15,
           'alpha':1e-3,
+          'alpha_dz':(1e-2, 1e-4, 1e-2),
+          'radius_dz':(1., 10.),
           'opacity_type':"hure",
           'is_turbulence':0, 
           'turbulent_forcing':1.3e-4,
@@ -1225,7 +1229,7 @@ class Disk(object):
           'mass_dep_cz_m_max':30}
   
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, 
-               viscosity_type=None, viscosity=None, alpha=None,
+               viscosity_type=None, viscosity=None, alpha=None, alpha_dz=None, radius_dz=None,
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
                dissipation_time_switch=None, is_irradiation=None, opacity_type=None,
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
@@ -1265,6 +1269,8 @@ class Disk(object):
     
     self.disk_parameter['viscosity'] = viscosity
     self.disk_parameter['alpha'] = alpha
+    self.disk_parameter['alpha_dz'] = alpha_dz
+    self.disk_parameter['radius_dz'] = radius_dz
     
     if (opacity_type != None):
       if (opacity_type in Disk.OPACITY_TYPES):
