@@ -1152,8 +1152,10 @@ class Disk(object):
                                     "!# the inner edge where the surface density is damped so\n" + \
                                     "!# that the surface density at the inner edge will be 0",
             'viscosity_type':"!# %s define the viscosity\n" % VISCOSITY_TYPES +\
-                             "!# constant : constant viscosity (being defined with the 'viscosity' parameter\n"+\
-                             "!# alpha : alpha prescription, (alpha being defined with the 'alpha' parameter", 
+                             "!# constant : constant viscosity (being defined with the 'viscosity' parameter)\n"+\
+                             "!# alpha : alpha prescription, (alpha being defined with the 'alpha' parameter)\n"+\
+                             "!# alpha_dz : (alphas are 3 values stored in 'alpha_dz', and separation radius \n"+\
+                             "!#            are 2 values stored in radius_dz)", 
             'viscosity':"!# Constant viscosity of the disk [cm^2/s]", 
             'alpha':"!# Alpha value used for alpha prescription of the viscosity (adimensioned)",
             'alpha_dz':"!# the alpha value for the alpha-prescription in the 3 regions",
