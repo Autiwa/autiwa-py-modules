@@ -1146,6 +1146,9 @@ class Disk(object):
                                 "!#  orbital distance and the second the surface density in g/cm^2", 
             'is_irradiation':"!# (0, False) if there is no stellar irradiation to compute temperature profile\n" + \
                              "!, (1, True) if there is stellar irradiation", 
+            'r_star':"!# in solar radii, the radius of the star for irradiation",
+            't_star':"!# in K, the temperature of the star for irradiation",
+            'disk_albedo':"!# [0..1] the disk albedo for irradiation",
             'disk_edges':"!# Here we define the radius_min and radius_max for the radius sample of the disk \n" +\
                          "!# (used for temperature profile for instance)", 
             'inner_smoothing_width':"!# The width (in unit of the inner boundary radius) of the region right after\n" + \
@@ -1203,6 +1206,9 @@ class Disk(object):
           'mean_molecular_weight':2.35, 
           'surface_density':(500,0.5), 
           'is_irradiation':1, 
+          'r_star':1.,
+          't_star':5700.,
+          'disk_albedo':0.5,
           'disk_edges':(0.1, 100.), 
           'inner_smoothing_width':0.05,
           'viscosity_type':'constant', 
@@ -1233,7 +1239,7 @@ class Disk(object):
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, 
                viscosity_type=None, viscosity=None, alpha=None, alpha_dz=None, radius_dz=None,
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
-               dissipation_time_switch=None, is_irradiation=None, opacity_type=None,
+               dissipation_time_switch=None, is_irradiation=None, r_star=None, t_star=None, disk_albedo=None, opacity_type=None,
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
                torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
                mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
@@ -1254,6 +1260,10 @@ class Disk(object):
       self.disk_parameter['is_irradiation'] = int(is_irradiation)
     else:
       self.disk_parameter['is_irradiation'] = None
+    
+    self.disk_parameter['r_star'] = r_star
+    self.disk_parameter['t_star'] = t_star
+    self.disk_parameter['disk_albedo'] = disk_albedo
     
     self.disk_parameter['disk_edges'] = disk_edges
     
