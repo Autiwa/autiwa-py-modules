@@ -1118,6 +1118,8 @@ class Disk(object):
   
   TORQUE_TYPES = ['real', 'mass_dependant', 'linear_indep', 'tanh_indep', 'manual']
   
+  DAMPING_TYPES = ['cossou', 'pierens', 'fendyke', 'none']
+  
   OPACITY_TYPES = ['bell', 'zhu', 'chambers', 'hure']
   
   VISCOSITY_TYPES = ['constant', 'alpha', 'alpha_dz']
@@ -1184,7 +1186,12 @@ class Disk(object):
             'inner_boundary_condition':"!# %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
             'outer_boundary_condition':"!# %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
             'sample':"!# number of point to the 1D radial grid of the disk"}
-  INTERACTIONS_COMMENT = {'torque_type':"!# %s define the torque type.\n" % TORQUE_TYPES +\
+  INTERACTIONS_COMMENT = {'damping_type':"!# %s define the corotation damping type.\n" % DAMPING_TYPES +\
+                          "!# cossou : from (cossou & raymond, 2013)\n" +\
+                          "!# pierens : from (pierens & cossou, 2013)\n" +\
+                          "!# fendyke : from (fendyke & nelson, 2013)\n" +\
+                          "!# none : no corotation damping",
+  'torque_type':"!# %s define the torque type.\n" % TORQUE_TYPES +\
                           "!# real : The torque from (pardekooper et al., 2011)\n" +\
                           "!# linear_indep : Mass independant convergence zone with a linear torque profile\n" +\
                           "!# tanh_indep : Mass independant convergence zone with a \n" +\
@@ -1217,6 +1224,7 @@ class Disk(object):
           'alpha_dz':(1e-2, 1e-4, 1e-2),
           'radius_dz':(1., 10.),
           'opacity_type':"hure",
+          'opacity_type':"cossou",
           'is_turbulence':0, 
           'turbulent_forcing':1.3e-4,
           'dissipation_type':0, 
@@ -1237,7 +1245,7 @@ class Disk(object):
           'mass_dep_cz_m_max':30}
   
   def __init__(self, b_over_h=None, adiabatic_index=None, mean_molecular_weight=None, surface_density=None, disk_edges=None, 
-               viscosity_type=None, viscosity=None, alpha=None, alpha_dz=None, radius_dz=None,
+               viscosity_type=None, viscosity=None, alpha=None, alpha_dz=None, radius_dz=None, damping_type=None,
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
                dissipation_time_switch=None, is_irradiation=None, r_star=None, t_star=None, disk_albedo=None, opacity_type=None,
                sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
@@ -1316,7 +1324,12 @@ class Disk(object):
     
     
     #####################################################################
-      
+    
+    if (damping_type != None):
+      if (damping_type in Disk.DAMPING_TYPES):
+        self.interaction_parameter['damping_type'] = damping_type
+      else:
+        raise NameError("'damping_type' does not correspond to an existing type : '%s'.\nAvailable damping types : %s" % (damping_type, Disk.DAMPING_TYPES))
       
     if (torque_type != None):
       if (torque_type in Disk.TORQUE_TYPES):
