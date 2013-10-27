@@ -1136,7 +1136,9 @@ class Disk(object):
           "!# Line must not be longer than 80 character, but comments can be far\n" + \
           "!# bigger than that, even on line with a parameter to read.\n\n"
   
-  DISK_COMMENT = {'b/h':"!# the smoothing length for the planet's potential", 
+  DISK_COMMENT = {'b/h':"!# the smoothing parameter for the planet's potential  \n" +\
+                        "!#  two values : first for Lindblad and second for corotation torque \n" +\
+                        "!#  one value  : apply for both", 
             'adiabatic_index':"!# the adiabatic index for the gas equation of state", 
             'mean_molecular_weight':"!# the mean molecular weight in mass of a proton", 
             'surface_density':"!# Here we define the power law for surface density \n" +\
@@ -1183,8 +1185,6 @@ class Disk(object):
             'dissipation_time_switch':'! (years) the time when we switch from viscous to photoevap (dissipation_type = 3)',
             'disk_exponential_decay':'! Value of the exponential decay timescale for the dissipation of the disk\n' +\
                                      '! (only if dissipation_type = 2)',
-            'inner_boundary_condition':"!# %s Condition at the inner boundary of the gas disk for dissipation" % BOUNDARIES, 
-            'outer_boundary_condition':"!# %s Condition at the outer boundary of the gas disk for dissipation" % BOUNDARIES,
             'sample':"!# number of point to the 1D radial grid of the disk"}
   INTERACTIONS_COMMENT = {'damping_type':"!# %s define the corotation damping type.\n" % DAMPING_TYPES +\
                           "!# cossou : from (cossou & raymond, 2013)\n" +\
@@ -1232,8 +1232,6 @@ class Disk(object):
           'tau_photoevap':3e4, 
           'dissipation_time_switch':2e6,
           'disk_exponential_decay':1e6,
-          'inner_boundary_condition':"closed", 
-          'outer_boundary_condition':"closed",
           'sample':400,
           'torque_type':"real",
           'torque_profile_steepness':1., 
@@ -1248,7 +1246,7 @@ class Disk(object):
                viscosity_type=None, viscosity=None, alpha=None, alpha_dz=None, radius_dz=None, damping_type=None,
                is_turbulence=None, turbulent_forcing=None, inner_smoothing_width=None, tau_viscous=None, tau_photoevap=None, 
                dissipation_time_switch=None, is_irradiation=None, r_star=None, t_star=None, disk_albedo=None, opacity_type=None,
-               sample=None, dissipation_type=None, disk_exponential_decay=None, inner_boundary_condition=None, outer_boundary_condition=None, 
+               sample=None, dissipation_type=None, disk_exponential_decay=None, 
                torque_type=None, torque_profile_steepness=None, saturation_torque=None, indep_cz=None, 
                mass_dep_m_min=None, mass_dep_m_max=None, mass_dep_cz_m_min=None, mass_dep_cz_m_max=None):
     """initialisation of the class"""
@@ -1256,6 +1254,7 @@ class Disk(object):
     self.disk_parameter = {}
     self.interaction_parameter = {}
     
+    # either a float or a tuple of two floats
     self.disk_parameter['b/h'] = b_over_h
     
     self.disk_parameter['adiabatic_index'] = adiabatic_index
@@ -1309,19 +1308,6 @@ class Disk(object):
     self.disk_parameter['dissipation_type'] = dissipation_type
     
     self.disk_parameter['disk_exponential_decay'] = disk_exponential_decay
-    
-    if (inner_boundary_condition != None):
-      if (inner_boundary_condition in Disk.BOUNDARIES):
-        self.disk_parameter['inner_boundary_condition'] = inner_boundary_condition
-      else:
-        raise NameError("'inner_boundary_condition' does not correspond to an existing type : '%s'\nAvailable conditions : %s" % (inner_boundary_condition, Disk.BOUNDARIES))
-    
-    if (outer_boundary_condition != None):
-      if (outer_boundary_condition in Disk.BOUNDARIES):
-        self.disk_parameter['outer_boundary_condition'] = outer_boundary_condition
-      else:
-        raise NameError("'outer_boundary_condition' does not correspond to an existing type : '%s'.\nAvailable conditions : %s" % (outer_boundary_condition, Disk.BOUNDARIES))
-    
     
     #####################################################################
     
@@ -1385,9 +1371,6 @@ class Disk(object):
     self.disk_parameter['dissipation_type'] = 0
   
     self.disk_parameter['disk_exponential_decay'] = None
-  
-    self.disk_parameter['inner_boundary_condition'] = None
-    self.disk_parameter['outer_boundary_condition'] = None
   
   #####################################################################
     self.interaction_parameter['torque_type'] = 'real'
@@ -1763,7 +1746,7 @@ if __name__=='__main__':
   bigin2.write()
   
   diskin = Disk(b_over_h=0.4, adiabatic_index=1.4, mean_molecular_weight=2.35, surface_density=(500, 0.5), 
-            viscosity=1e15, sample=200, dissipation_type=0, inner_boundary_condition='open', outer_boundary_condition='open')
+            viscosity=1e15, sample=200, dissipation_type=0)
   diskin.write()
   
   pdb.set_trace()
