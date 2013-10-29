@@ -943,6 +943,14 @@ class Param(object):
     """set the algorithm to the value given in parameter"""
     
     self.algorithme = algorithm
+    
+  def get_start_time(self):
+    """return the value contained in 'self.start_time'
+    
+    Return : start_time (in days)
+    """
+    
+    return self.start_time
   
   def get_stop_time(self):
     """return the value contained in 'self.stop_time'

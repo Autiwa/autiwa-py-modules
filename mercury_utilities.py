@@ -182,21 +182,25 @@ def generateOutputs():
   
   (stdout, stderr, returnCode) = autiwa.lancer_commande(command)
 
-def extend_simulation(extension):
+def change_integration_time(new_integration_time):
   """Will increase the integration time of a simulation in the current working directory.
   
   Parameters :
-  extension : (float) the extension time in years
+  new_integration_time : (float) the new integration time in years
   """
   # We get the integration time
   paramin = mercury.Param(algorithme="HYBRID", start_time=0, stop_time=0, output_interval=0, 
   h=0)
   paramin.read()
-  integration_time = paramin.integration_time
   
-  stop_time = paramin.get_stop_time()
+  if ((paramin.integration_time / 365.25) > new_integration_time):
+    print("Error: New integration time is lower than the previous one")
+    print("Aborted.")
+    exit()
   
-  paramin.set_stop_time(stop_time + extension * 365.25)
+  start_time = paramin.get_start_time()
+  
+  paramin.set_stop_time(start_time + new_integration_time * 365.25)
   
   paramin.write()
   if (os.path.isfile("param.dmp")):
