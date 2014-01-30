@@ -81,9 +81,21 @@ def list_tag(commit):
 def write_infos_in_f90_file(main_branch='master'):
   """This function will create a fortran file that will store, as variable, some infos about a git repository"""
   
-  F90_BEGIN = "module git_infos\n" + \
-              "! Automatically generated file through Makefile.py, do not modify manually !\n" + \
-              "implicit none\n\n"
+  F90_BEGIN = """!******************************************************************************
+! MODULE: git_infos
+!******************************************************************************
+!
+! DESCRIPTION: 
+!> @brief Automatically generated module (with Makefile.py) that contain
+!! information on code version and branch name. 
+!
+!> @warning Do not modify this file manually !
+!
+!******************************************************************************
+module git_infos
+implicit none
+
+"""
 
   F90_END = "\nend module git_infos"
 
@@ -98,8 +110,8 @@ def write_infos_in_f90_file(main_branch='master'):
   
   f90source = open("git_infos.f90", 'w')
   f90source.write(F90_BEGIN)
-  f90source.write("character(len=40), parameter :: commit = '%s'\n" % commit)
-  f90source.write("character(len=%d), parameter :: branch = '%s'\n" % (len(branch), branch))
+  f90source.write("character(len=40), parameter :: commit = '%s' !< commit ID when binary was compiled \n" % commit)
+  f90source.write("character(len=%d), parameter :: branch = '%s' !< branch name when compilation occured\n" % (len(branch), branch))
   if (isModifs):
     f90source.write("character(len=80), parameter :: modifs = '/!\ There is non committed modifications'\n")
   else:
